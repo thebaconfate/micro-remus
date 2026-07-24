@@ -25,12 +25,6 @@ typedef struct {
   size_t capacity;
 } Commands;
 
-typedef struct {
-  DeploymentId *storage;
-  size_t len;
-  size_t capacity;
-} Scope;
-
 typedef struct ReactorEntry {
   Name key;
   struct Reactor *val;
@@ -54,5 +48,13 @@ typedef struct SignalEntry {
 } SignalEntry;
 
 typedef SignalEntry *SignalEnvironment;
+
+typedef OptionArray Memory;
+
+typedef struct {
+  DeploymentId *storage;
+  size_t len;
+  size_t capacity;
+} Scope;
 
 #endif
