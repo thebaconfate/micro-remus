@@ -2,13 +2,13 @@
 #ifndef OPTION_H
 #define OPTION_H
 
-struct Value;
+#include "value.h"
 
 typedef enum { NONE, SOME } OptionTag;
 
 typedef struct {
   OptionTag option_tag;
-  struct Value *value;
+  Value *value;
 } Option;
 
 #endif
