@@ -15,15 +15,13 @@ int main() {
 
   printf("branch stored\n");
 
-  Branch *b = find_branch(name);
+  Value *v = find_branch(name);
 
-  if (b == NULL) {
+  if (v == NULL) {
     printf("Branch not found\n");
   }
 
-  Value val1 = b->val;
-
-  printf("value: %d\n", (int)val1.as.number);
+  printf("value: %d\n", (int)v->as.number);
 
   return 0;
 }

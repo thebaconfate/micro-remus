@@ -6,17 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-Branch *branches = NULL;
+static Branches branches = NULL;
 
 /**
  * @brief Frees all memory associated with the global branches hash table.
  *
  * Iterates through the global hash table, removes each entry, frees its
- * dynamically allocated key, value pointer (if allocated), and finally releases
- * the Branch structure.
+ * dynamically allocated key, and releases the BranchEntry structure.
  */
 void free_branches() {
-  Branch *branch, *tmp;
+  BranchEntry *branch, *tmp;
   HASH_ITER(hh, branches, branch, tmp) {
     HASH_DEL(branches, branch);
     if (branch->key)
@@ -26,27 +25,27 @@ void free_branches() {
 }
 
 /**
- * @brief Finds a branch entry stored under a given reactor name.
+ * @brief Finds a stored value given a reactor name.
  *
  * Searches the global branch storage for an entry matching the provided reactor
  * name.
  *
  * @param reactor_name The key used to locate the branch entry.
  *
- * @return A pointer to the matching Branch struct if found, or NULL if
- * reactor_name is NULL or no matching entry exists.
+ * @return A pointer to the stored Value if found, or NULL if no matching entry
+ * exists.
  */
-Branch *find_branch(const Name reactor_name) {
-  Branch *s = NULL;
+Value *find_branch(const Name reactor_name) {
+  BranchEntry *s = NULL;
   HASH_FIND(hh, branches, reactor_name, strlen(reactor_name), s);
-  return s;
+  return s ? &(s->val) : NULL;
 }
 
 /**
  * @brief Stores a value under a given reactor name in the global branch
  * storage.
  *
- * Dynamically allocates a new Branch entry, duplicates the reactor_name string
+ * Dynamically allocates a new BranchEntry, duplicates the reactor_name string
  * onto the heap, assigns the provided value, and inserts the entry into the
  * global hash table.
  *
@@ -56,10 +55,17 @@ Branch *find_branch(const Name reactor_name) {
  * @note If memory allocation fails, the entry will not be stored.
  */
 void add_branch(Name reactor_name, Value value) {
-  Branch *s = malloc(sizeof(Branch));
+  BranchEntry *s = malloc(sizeof(BranchEntry));
+  if (!s)
+    return;
+
   size_t name_len = strlen(reactor_name);
 
   s->key = malloc(name_len + 1);
+  if (!s->key) {
+    free(s);
+    return;
+  }
   strcpy(s->key, reactor_name);
 
   s->val = value;
