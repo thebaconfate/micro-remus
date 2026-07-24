@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-struct Branch;
+struct BranchEntry;
 
 typedef enum {
   NUMBER,
@@ -18,8 +18,15 @@ typedef struct Value {
     Number number;
     Boolean boolean;
     Name reactor;
-    struct Branch *branch;
+    struct BranchEntry *branch;
   } as;
 } Value;
+
+void print_value(const Value *v);
+bool value_equals(Value a, Value b);
+Value value_add(Value a, Value b);
+Value value_mul(Value a, Value b);
+Value value_sum(const Value *values, size_t count);
+Value value_product(const Value *values, size_t count);
 
 #endif
