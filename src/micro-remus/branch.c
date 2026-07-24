@@ -9,30 +9,32 @@
 Branch *branches = NULL;
 
 /**
- * @brief Frees all memory associated with a branch.
+ * @brief Frees all memory associated with the global branches hash table.
  *
- * Releases the memory allocated for stored keys, values, the branch storage,
- * and finally the branch itself.
- *
+ * Iterates through the global hash table, removes each entry, frees its
+ * dynamically allocated key, value pointer (if allocated), and finally releases
+ * the Branch structure.
  */
 void free_branches() {
   Branch *branch, *tmp;
   HASH_ITER(hh, branches, branch, tmp) {
     HASH_DEL(branches, branch);
+    if (branch->key)
+      free(branch->key);
     free(branch);
   }
 }
 
 /**
- * @brief Finds a value stored under a given name.
+ * @brief Finds a branch entry stored under a given reactor name.
  *
- * Searches the branch storage for an entry matching the provided reactor name.
+ * Searches the global branch storage for an entry matching the provided reactor
+ * name.
  *
- * @param branch The branch to search.
- * @param reactor_name The name of the value to find.
+ * @param reactor_name The key used to locate the branch entry.
  *
- * @return A pointer to the stored value if found, or NULL if the branch,
- *         name, or matching entry does not exist.
+ * @return A pointer to the matching Branch struct if found, or NULL if
+ * reactor_name is NULL or no matching entry exists.
  */
 Branch *find_branch(const Name reactor_name) {
   Branch *s = NULL;
@@ -41,16 +43,17 @@ Branch *find_branch(const Name reactor_name) {
 }
 
 /**
- * @brief Stores a value under a given name in a branch.
+ * @brief Stores a value under a given reactor name in the global branch
+ * storage.
  *
- * If an entry with the given reactor name already exists, its value is updated.
- * Otherwise, a new entry is allocated and appended to the branch storage.
+ * Dynamically allocates a new Branch entry, duplicates the reactor_name string
+ * onto the heap, assigns the provided value, and inserts the entry into the
+ * global hash table.
  *
- * @param branch The branch in which to store the value.
- * @param reactor_name The name used to identify the stored value.
- * @param value The value to store.
+ * @param reactor_name The string key identifying the branch entry.
+ * @param value The value to store in the branch.
  *
- * @note If memory allocation fails, the value will not be stored.
+ * @note If memory allocation fails, the entry will not be stored.
  */
 void add_branch(Name reactor_name, Value value) {
   Branch *s = malloc(sizeof(Branch));
