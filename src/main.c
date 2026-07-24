@@ -8,7 +8,7 @@ int main() {
   printf("executing main\n");
   printf("branch created\n");
 
-  Value val = {.type = NUMBER, .as = {.number = 5}};
+  Value val = {.type = VAL_NUMBER, .as = {.number = 5}};
   Name name = "Main";
 
   add_branch(name, val);

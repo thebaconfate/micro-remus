@@ -6,10 +6,10 @@
 struct BranchEntry;
 
 typedef enum {
-  NUMBER,
-  BOOLEAN,
-  REACTOR,
-  BRANCH,
+  VAL_NUMBER,
+  VAL_BOOLEAN,
+  VAL_REACTOR,
+  VAL_BRANCH,
 } ValueType;
 
 typedef struct Value {
