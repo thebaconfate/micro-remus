@@ -4,6 +4,7 @@
 #include "location.h"
 #include "types.h"
 #include "value.h"
+
 typedef enum {
   CMD_ALLOC_MONO,
   CMD_DEF_RHO,

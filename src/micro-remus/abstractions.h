@@ -2,12 +2,12 @@
 #define REMUS_ABSTRACTIONS_H
 
 #include "../include/uthash.h"
+#include "command.h"
 #include "option.h"
 #include "types.h"
 #include <stddef.h>
 
 struct Deployment;
-struct Command;
 struct Reactor;
 
 typedef struct {
@@ -20,7 +20,7 @@ typedef OptionArray Inputs;
 typedef OptionArray Outputs;
 
 typedef struct {
-  struct Command *storage;
+  Command *storage;
   size_t len;
   size_t capacity;
 } Commands;

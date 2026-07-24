@@ -1,4 +1,5 @@
 #include "value.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,32 +39,50 @@ bool value_equals(Value a, Value b) {
   }
 }
 
+bool value_same_type(Value a, Value b) { return a.type == b.type; }
+
+bool value_number(Value a) { return a.type == VAL_NUMBER; }
+
+bool value_numbers(Value a, Value b) {
+  return value_number(a) && value_number(b);
+}
+
 Value value_add(Value a, Value b) {
-  if (a.type == VAL_NUMBER && b.type == VAL_NUMBER) {
+  if (value_numbers(a, b))
     return (Value){.type = VAL_NUMBER, .as.number = a.as.number + b.as.number};
-  }
   fprintf(stderr, "Error: Incompatible types to perform addition\n");
   exit(EXIT_FAILURE);
 }
 
 Value value_mul(Value a, Value b) {
-  if (a.type == VAL_NUMBER && b.type == VAL_NUMBER) {
+  if (value_numbers(a, b))
     return (Value){.type = VAL_NUMBER, .as.number = a.as.number * b.as.number};
-  }
-  fprintf(stderr, "Error: Incompatible types to perform addition\n");
+  fprintf(stderr, "Error: Incompatible types to perform multiplication\n");
   exit(EXIT_FAILURE);
 }
 
 Value value_sum(const Value *values, size_t count) {
   Value acc = {.type = VAL_NUMBER, .as.number = 0};
-  for (size_t i = 0; i < count; i++)
-    acc = value_add(acc, values[i]);
+  for (size_t i = 0; i < count; i++) {
+    if (values[i].type != VAL_NUMBER) {
+      fprintf(stderr, "Error: Incompatible types to perform sum\n");
+      exit(EXIT_FAILURE);
+    }
+    acc = (Value){.type = VAL_NUMBER,
+                  .as.number = acc.as.number + values[i].as.number};
+  }
   return acc;
 }
 
 Value value_product(const Value *values, size_t count) {
   Value acc = {.type = VAL_NUMBER, .as.number = 1};
-  for (size_t i = 0; i < count; i++)
-    acc = value_mul(acc, values[i]);
+  for (size_t i = 0; i < count; i++) {
+    if (values[i].type != VAL_NUMBER) {
+      fprintf(stderr, "Error: Incompatible types to perform product\n");
+      exit(EXIT_FAILURE);
+    }
+    acc = (Value){.type = VAL_NUMBER,
+                  .as.number = acc.as.number * values[i].as.number};
+  }
   return acc;
 }
