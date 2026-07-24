@@ -1,28 +1,15 @@
 #ifndef REMUS_BRANCH_H
 #define REMUS_BRANCH_H
 
+#include "../include/uthash.h"
 #include "types.h"
 #include "value.h"
 
-typedef struct {
-  Name key;
-  Value *val;
-} BranchEntry;
-
 typedef struct Branch {
-  BranchEntry *storage;
-  size_t capacity;
-  size_t count;
+  Name key;
+  Value val;
+  UT_hash_handle hh;
 } Branch;
-
-/**
- * @brief Creates a new branch
- *
- * Allocates memory for a branch and initializes its storage.
- *
- * @return a pointer to the newly created branch, or NULL on failure
- */
-Branch *branch_new(void);
 
 /**
  * @brief Frees all memory associated with a branch.
@@ -30,9 +17,8 @@ Branch *branch_new(void);
  * Releases the memory allocated for stored keys, values, the branch storage,
  * and finally the branch itself.
  *
- * @param branch The branch to free. If NULL, the function does nothing.
  */
-void branch_free(Branch *branch);
+void free_branches();
 
 /**
  * @brief Finds a value stored under a given name.
@@ -45,7 +31,7 @@ void branch_free(Branch *branch);
  * @return A pointer to the stored value if found, or NULL if the branch,
  *         name, or matching entry does not exist.
  */
-Value *branch_find(const Branch *branch, Name reactor_name);
+Branch *find_branch(Name reactor_name);
 
 /**
  * @brief Stores a value under a given name in a branch.
@@ -59,6 +45,6 @@ Value *branch_find(const Branch *branch, Name reactor_name);
  *
  * @note If memory allocation fails, the value will not be stored.
  */
-void branch_store(Branch *branch, Name reactor_name, Value value);
+void add_branch(Name reactor_name, Value value);
 
 #endif

@@ -1,27 +1,29 @@
 
 #include "micro-remus/branch.h"
+#include "micro-remus/types.h"
 #include "micro-remus/value.h"
 #include <stdio.h>
 int main() {
 
   printf("executing main\n");
-  Branch *branch = branch_new();
   printf("branch created\n");
 
   Value val = {.type = NUMBER, .as = {.number = 5}};
-  branch_store(branch, "main", val);
+  Name name = "Main";
+
+  add_branch(name, val);
 
   printf("branch stored\n");
 
-  Value *val1 = branch_find(branch, "main");
+  Branch *b = find_branch(name);
 
-  if (val1 == NULL) {
-    printf("value not found\n");
+  if (b == NULL) {
+    printf("Branch not found\n");
   }
 
-  Number cint = val1->as.number;
+  Value val1 = b->val;
 
-  printf("value: %d\n", (int)cint);
+  printf("value: %d\n", (int)val1.as.number);
 
   return 0;
 }
