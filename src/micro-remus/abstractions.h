@@ -7,17 +7,14 @@
 #include "types.h"
 #include <stddef.h>
 
-struct Deployment;
-struct Reactor;
-
 typedef struct {
-  Option *storage;
+  ValueOption *storage;
   size_t len;
   size_t capacity;
-} OptionArray;
+} ValueOptionArray;
 
-typedef OptionArray Inputs;
-typedef OptionArray Outputs;
+typedef ValueOptionArray Inputs;
+typedef ValueOptionArray Outputs;
 
 typedef struct {
   Command *storage;
@@ -49,7 +46,7 @@ typedef struct SignalEntry {
 
 typedef SignalEntry *SignalEnvironment;
 
-typedef OptionArray Memory;
+typedef ValueOptionArray Memory;
 
 typedef struct {
   DeploymentId *storage;

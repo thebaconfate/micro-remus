@@ -3,10 +3,10 @@
 #include "types.h"
 #include <stdbool.h>
 
-typedef struct OptionDeploymentId {
+typedef struct DeploymentIdOption {
   OptionTag option_tag;
   DeploymentId deployment_id;
-} OptionDeploymentId;
+} DeploymentIdOption;
 
 typedef struct Deployment {
   DeploymentId deployment_id;
@@ -17,7 +17,7 @@ typedef struct Deployment {
   Memory deployment_memory;
   Memory reaction_memory;
   size_t pc;
-  OptionDeploymentId return_address;
+  DeploymentIdOption return_address;
   bool dirty_bit;
   Scope scope;
 } Deployment;

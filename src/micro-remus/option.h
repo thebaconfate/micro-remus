@@ -9,6 +9,6 @@ typedef enum { NONE, SOME } OptionTag;
 typedef struct {
   OptionTag option_tag;
   Value *value;
-} Option;
+} ValueOption;
 
 #endif

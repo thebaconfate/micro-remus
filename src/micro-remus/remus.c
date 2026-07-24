@@ -3,6 +3,8 @@
 #include "value.h"
 #include <stdbool.h>
 
+// TODO: Actually implement these functions
+
 bool remus_read_d(DeploymentId deployment_id, Number n, Value *out_val) {
   return true;
 }
