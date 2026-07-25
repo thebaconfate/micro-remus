@@ -14,7 +14,7 @@ static Branches branches = NULL;
  * Iterates through the global hash table, removes each entry, frees its
  * dynamically allocated key, and releases the BranchEntry structure.
  */
-void free_branches() {
+void branch_free() {
   BranchEntry *branch, *tmp;
   HASH_ITER(hh, branches, branch, tmp) {
     HASH_DEL(branches, branch);
@@ -35,7 +35,7 @@ void free_branches() {
  * @return A pointer to the stored Value if found, or NULL if no matching entry
  * exists.
  */
-Value *find_branch(const Name reactor_name) {
+Value *branch_find(const Name reactor_name) {
   BranchEntry *s = NULL;
   HASH_FIND(hh, branches, reactor_name, strlen(reactor_name), s);
   return s ? &(s->val) : NULL;
@@ -54,7 +54,7 @@ Value *find_branch(const Name reactor_name) {
  *
  * @note If memory allocation fails, the entry will not be stored.
  */
-void add_branch(Name reactor_name, Value value) {
+void branch_add(Name reactor_name, Value value) {
   BranchEntry *s = malloc(sizeof(BranchEntry));
   if (!s)
     return;

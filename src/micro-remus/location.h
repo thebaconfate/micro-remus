@@ -1,6 +1,7 @@
 #ifndef REMUS_LOCATION_H
 #define REMUS_LOCATION_H
 
+#include "option.h"
 #include "types.h"
 #include "value.h"
 #include <stdbool.h>
@@ -30,7 +31,7 @@ typedef struct Location {
  * @return true if a value was found and written to out_val, false otherwise
  * (Option::None).
  */
-bool location_fetch(const Location *loc, DeploymentId deployment_id,
-                    const struct Remus *remus, Value *out_val);
+ValueOption location_fetch(const Location *loc, DeploymentId deployment_id,
+                           struct Remus *remus, Value *out_val);
 
 #endif

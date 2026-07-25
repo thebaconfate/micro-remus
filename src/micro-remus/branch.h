@@ -19,7 +19,7 @@ typedef BranchEntry *Branches;
  * Iterates through the global hash table, removes each entry, frees its
  * dynamically allocated key, and releases the BranchEntry structure.
  */
-void free_branches();
+void branch_free();
 
 /**
  * @brief Finds a stored value given a reactor name.
@@ -32,7 +32,7 @@ void free_branches();
  * @return A pointer to the stored Value if found, or NULL if no matching entry
  * exists.
  */
-Value *find_branch(Name reactor_name);
+Value *branch_find(Name reactor_name);
 
 /**
  * @brief Stores a value under a given reactor name in the global branch
@@ -47,6 +47,6 @@ Value *find_branch(Name reactor_name);
  *
  * @note If memory allocation fails, the entry will not be stored.
  */
-void add_branch(Name reactor_name, Value value);
+void branch_add(Name reactor_name, Value value);
 
 #endif

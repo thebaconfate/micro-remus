@@ -11,11 +11,11 @@ int main() {
   Value val = {.type = VAL_NUMBER, .as = {.number = 5}};
   Name name = "Main";
 
-  add_branch(name, val);
+  branch_add(name, val);
 
   printf("branch stored\n");
 
-  Value *v = find_branch(name);
+  Value *v = branch_find(name);
 
   if (v == NULL) {
     printf("Branch not found\n");

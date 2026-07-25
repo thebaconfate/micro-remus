@@ -1,22 +1,22 @@
 #include "location.h"
-#include "abstractions.h"
+#include "option.h"
 #include "remus.h"
 #include "value.h"
 
-bool location_fetch(const Location *loc, DeploymentId deployment_id,
-                    const Remus *remus, Value *out_val) {
+ValueOption location_fetch(const Location *loc, DeploymentId deployment_id,
+                           Remus *remus, Value *out_val) {
   if (!loc || !remus || !out_val)
-    return false;
+    return (ValueOption){.option_tag = NONE};
   switch (loc->type) {
   case LOC_D:
-    return remus_read_d(deployment_id, loc->index, out_val);
+    return remus_read_d(remus, deployment_id, loc->index);
   case LOC_R:
-    return remus_read_r(deployment_id, loc->index, out_val);
+    return remus_read_r(remus, deployment_id, loc->index);
   case LOC_I:
-    return remus_get_input(deployment_id, loc->index, out_val);
+    return remus_get_input(remus, deployment_id, loc->index);
   case LOC_O:
-    return remus_get_output(deployment_id, loc->index, out_val);
+    return remus_get_output(remus, deployment_id, loc->index);
   default:
-    return false;
+    return (ValueOption){.option_tag = NONE};
   }
 }
