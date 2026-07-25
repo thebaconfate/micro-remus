@@ -87,9 +87,9 @@ static void command_handle_update(Command *command, Remus *remus,
       remus_react(remus, current_deployment_id);
       break;
     case NONE:
-      // TODO: Continue from here
-      break;
     default:
+      fprintf(stderr, "Error: Expected value from operand");
+      exit(EXIT_FAILURE);
       break;
     }
     break;
@@ -100,8 +100,75 @@ static void command_handle_update(Command *command, Remus *remus,
     fprintf(stderr, "Error: A trampoline variable should be stored in the "
                     "deployment memory\n");
     exit(EXIT_FAILURE);
+    break;
   }
 };
+
+static void command_handle_scan(Command *command, Remus *remus,
+                                DeploymentId current_deployment_id) {
+  Scan scan = command->as.scan;
+  ValueOption operandOption;
+  operandOption = operand_fetch(&scan.operand, current_deployment_id, remus);
+  switch (operandOption.option_tag) {
+  case SOME:
+    remus_write(remus, current_deployment_id, *operandOption.value);
+    remus_increment_pc(remus, current_deployment_id);
+    remus_react(remus, current_deployment_id);
+    break;
+  case NONE:
+  default:
+    fprintf(stderr, "Error: Expected the operand to contain a value, got NONE");
+    exit(EXIT_FAILURE);
+  }
+};
+
+static void command_handle_react(Command *command, Remus *remus,
+                                 DeploymentId current_deployment_id) {
+  React react = command->as.react;
+  // TODO: implement this;
+}
+
+static void command_handle_consume(Command *command, Remus *remus,
+                                   DeploymentId current_deployment_id) {
+  Consume consume = command->as.consume;
+  // TODO: implement this;
+}
+
+static void command_handle_global(Command *command, Remus *remus,
+                                  DeploymentId current_deployment_id) {
+  Global global = command->as.global;
+  // TODO: implement this;
+}
+
+static void command_handle_read(Command *command, Remus *remus,
+                                DeploymentId current_deployment_id) {
+  Read read = command->as.read;
+  // TODO: implement this;
+}
+
+static void command_handle_sink(Command *command, Remus *remus,
+                                DeploymentId current_deployment_id) {
+  Sink sink = command->as.sink;
+  // TODO: implement this;
+}
+
+static void command_handle_make_poly(Command *command, Remus *remus,
+                                     DeploymentId current_deployment_id) {
+  MakePoly make_poly = command->as.make_poly;
+  // TODO: implement this;
+}
+
+static void command_handle_alloc_poly(Command *command, Remus *remus,
+                                      DeploymentId current_deployment_id) {
+  AllocPoly alloc_poly = command->as.alloc_poly;
+  // TODO: implement this;
+}
+
+static void command_handle_primitive(Command *command, Remus *remus,
+                                     DeploymentId current_deployment_id) {
+  Primitive primitive = command->as.primitive;
+  // TODO: implement this;
+}
 
 void command_execute(Command *command, DeploymentId current_deployment_id,
                      Remus *remus) {
@@ -126,22 +193,31 @@ void command_execute(Command *command, DeploymentId current_deployment_id,
     command_handle_update(command, remus, current_deployment_id);
     break;
   case CMD_SCAN:
+    command_handle_scan(command, remus, current_deployment_id);
     break;
   case CMD_REACT:
+    command_handle_react(command, remus, current_deployment_id);
     break;
   case CMD_CONSUME:
+    command_handle_consume(command, remus, current_deployment_id);
     break;
   case CMD_GLOBAL:
+    command_handle_global(command, remus, current_deployment_id);
     break;
   case CMD_READ:
+    command_handle_read(command, remus, current_deployment_id);
     break;
   case CMD_SINK:
+    command_handle_sink(command, remus, current_deployment_id);
     break;
   case CMD_MAKE_POLY:
+    command_handle_make_poly(command, remus, current_deployment_id);
     break;
   case CMD_ALLOC_POLY:
+    command_handle_alloc_poly(command, remus, current_deployment_id);
     break;
   case CMD_PRIMITIVE:
+    command_handle_primitive(command, remus, current_deployment_id);
     break;
   default:
     fprintf(stderr, "Error: Invalid command type tag\n");
