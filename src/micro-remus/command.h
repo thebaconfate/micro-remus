@@ -2,6 +2,7 @@
 #define REMUS_COMMAND_H
 
 #include "location.h"
+#include "operand.h"
 #include "types.h"
 #include "value.h"
 
@@ -23,14 +24,94 @@ typedef enum {
   CMD_PRIMITIVE
 } CommandTag;
 
+typedef struct AllocMono {
+  Name name;
+} AllocMono;
+
+typedef struct DefRho {
+  Name name;
+} DefRho;
+
+typedef struct AllocRho {
+  Location location;
+} AllocRho;
+
+typedef struct Trampoline {
+  Value value;
+} Trampoline;
+
+typedef struct Supply {
+  Operand operand;
+  Location location;
+  Number number;
+} Supply;
+
+typedef struct Update {
+  Operand operand;
+  Location location;
+} Update;
+
+typedef struct Scan {
+  Operand operand;
+  Number number;
+} Scan;
+
+typedef struct React {
+  Location location;
+} React;
+
+typedef struct Consume {
+  Location location;
+  Number number;
+} Consume;
+
+typedef struct Read {
+  Location location;
+} Read;
+
+typedef struct Global {
+  Name name;
+} Global;
+
+typedef struct Sink {
+  Operand operand;
+  Number number;
+} Sink;
+
+typedef struct MakePoly {
+} MakePoly;
+
+typedef struct AllocPoly {
+  Operand operand;
+  Location location;
+} AllocPoly;
+
+typedef struct Primitive {
+  Name name;
+} Primitive;
+
 typedef struct {
   CommandTag tag;
   union {
-    Name name;
-    Location location;
-    Value value;
-    // TODO: finish this
+    AllocMono alloc_mono;
+    DefRho def_rho;
+    AllocRho alloc_rho;
+    Trampoline trampoline;
+    Supply supply;
+    Update update;
+    Scan scan;
+    React react;
+    Consume consume;
+    Read read;
+    Global global;
+    Sink sink;
+    MakePoly make_poly;
+    AllocPoly alloc_poly;
+    Primitive primitive;
   } as;
 } Command;
+
+void command_execute(Command *command, DeploymentId deployment_id,
+                     struct Remus *remus);
 
 #endif

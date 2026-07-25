@@ -3,7 +3,6 @@
 
 #include "option.h"
 #include "types.h"
-#include "value.h"
 #include <stdbool.h>
 
 struct Remus;
@@ -32,6 +31,6 @@ typedef struct Location {
  * (Option::None).
  */
 ValueOption location_fetch(const Location *loc, DeploymentId deployment_id,
-                           struct Remus *remus, Value *out_val);
+                           struct Remus *remus);
 
 #endif
