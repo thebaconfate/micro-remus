@@ -7,7 +7,7 @@
 #include "types.h"
 #include <stddef.h>
 
-typedef struct {
+typedef struct ValueOptionArray {
   ValueOption *storage;
   size_t len;
   size_t capacity;
@@ -16,7 +16,7 @@ typedef struct {
 typedef ValueOptionArray Inputs;
 typedef ValueOptionArray Outputs;
 
-typedef struct {
+typedef struct Commands {
   Command *storage;
   size_t len;
   size_t capacity;
@@ -48,7 +48,7 @@ typedef SignalEntry *SignalEnvironment;
 
 typedef ValueOptionArray Memory;
 
-typedef struct {
+typedef struct Scope {
   DeploymentId *storage;
   size_t len;
   size_t capacity;
