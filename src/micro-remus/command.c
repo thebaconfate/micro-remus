@@ -17,8 +17,8 @@ static void command_handle_alloc_mono(Remus *remus,
 static void command_handle_def_rho(Command *command, Remus *remus,
                                    DeploymentId current_deployment_id) {
   DefRho def_rho = command->as.def_rho;
-  remus_write(remus, current_deployment_id,
-              (Value){.type = VAL_REACTOR, .as.reactor = def_rho.name});
+  Value reactor = {.type = VAL_REACTOR, .as.reactor = def_rho.name};
+  remus_write(remus, current_deployment_id, reactor);
   remus_increment_pc(remus, current_deployment_id);
   remus_react(remus, current_deployment_id);
 }
@@ -40,17 +40,19 @@ static void command_handle_trampoline(Command *command, Remus *remus,
 static void command_handle_supply(Command *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Supply supply = command->as.supply;
-  ValueOption locationOption, operandOption;
-  locationOption =
+  ValueOption location_option, operand_option;
+  DeploymentId deployment_id;
+  location_option =
       location_fetch(&supply.location, current_deployment_id, remus);
-  switch (locationOption.option_tag) {
+  switch (location_option.option_tag) {
   case SOME:
-    operandOption =
+    deployment_id = location_option.value->as.number;
+    operand_option =
         operand_fetch(&supply.operand, current_deployment_id, remus);
-    switch (operandOption.option_tag) {
+    switch (operand_option.option_tag) {
     case SOME:
-      remus_set_input(remus, operandOption.value->as.number, supply.number,
-                      *operandOption.value);
+      remus_set_input(remus, deployment_id, supply.number,
+                      *operand_option.value);
       remus_increment_pc(remus, current_deployment_id);
       remus_react(remus, current_deployment_id);
       break;
@@ -108,11 +110,11 @@ static void command_handle_scan(Command *command, Remus *remus,
   Scan scan = command->as.scan;
   DeploymentId deployment_id =
       remus_get_deployment_in_scope(remus, current_deployment_id, scan.number);
-  ValueOption operandOption;
-  operandOption = operand_fetch(&scan.operand, deployment_id, remus);
-  switch (operandOption.option_tag) {
+  ValueOption operand_option;
+  operand_option = operand_fetch(&scan.operand, deployment_id, remus);
+  switch (operand_option.option_tag) {
   case SOME:
-    remus_write(remus, current_deployment_id, *operandOption.value);
+    remus_write(remus, current_deployment_id, *operand_option.value);
     remus_increment_pc(remus, current_deployment_id);
     remus_react(remus, current_deployment_id);
     break;
@@ -178,25 +180,62 @@ static void command_handle_consume(Command *command, Remus *remus,
 static void command_handle_global(Command *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Global global = command->as.global;
-  // TODO: implement this;
+  ValueOption value_option = remus_get_signal(remus, global.name);
+  switch (value_option.option_tag) {
+  case SOME:
+    remus_write(remus, current_deployment_id, *value_option.value);
+    remus_increment_pc(remus, current_deployment_id);
+    remus_react(remus, current_deployment_id);
+    break;
+  case NONE:
+  default:
+    fprintf(stderr, "Error: Expected a value for the global signal %s",
+            value_option.value->as.reactor);
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void command_handle_read(Command *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Read read = command->as.read;
-  // TODO: implement this;
+  ValueOption location_option;
+  Value value;
+  switch (read.location.type) {
+  case LOC_D:
+    location_option =
+        location_fetch(&read.location, current_deployment_id, remus);
+    switch (location_option.option_tag) {
+    case SOME:
+      remus_write(remus, current_deployment_id, *location_option.value);
+      remus_increment_pc(remus, current_deployment_id);
+      remus_react(remus, current_deployment_id);
+    case NONE:
+    default:
+      fprintf(stderr, "Error: expected trampoline variable to contain a value");
+      exit(EXIT_FAILURE);
+    }
+  case LOC_I:
+  case LOC_O:
+  case LOC_R:
+  default:
+    fprintf(stderr, "Error: A trampoline variable should be stored in the "
+                    "deployment memory");
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void command_handle_sink(Command *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Sink sink = command->as.sink;
+  // TODO: continue from here
   // TODO: implement this;
 }
 
-static void command_handle_make_poly(Command *command, Remus *remus,
+static void command_handle_make_poly(Remus *remus,
                                      DeploymentId current_deployment_id) {
-  MakePoly make_poly = command->as.make_poly;
-  // TODO: implement this;
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
+  return;
 }
 
 static void command_handle_alloc_poly(Command *command, Remus *remus,
@@ -252,7 +291,7 @@ void command_execute(Command *command, DeploymentId current_deployment_id,
     command_handle_sink(command, remus, current_deployment_id);
     break;
   case CMD_MAKE_POLY:
-    command_handle_make_poly(command, remus, current_deployment_id);
+    command_handle_make_poly(remus, current_deployment_id);
     break;
   case CMD_ALLOC_POLY:
     command_handle_alloc_poly(command, remus, current_deployment_id);
