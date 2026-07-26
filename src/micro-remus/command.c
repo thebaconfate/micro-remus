@@ -89,7 +89,7 @@ static void command_handle_update(Command *command, Remus *remus,
       break;
     case NONE:
     default:
-      fprintf(stderr, "Error: Expected value from operand");
+      fprintf(stderr, "Error: Expected value from operand\n");
       exit(EXIT_FAILURE);
       break;
     }
@@ -120,7 +120,8 @@ static void command_handle_scan(Command *command, Remus *remus,
     break;
   case NONE:
   default:
-    fprintf(stderr, "Error: Expected the operand to contain a value, got NONE");
+    fprintf(stderr,
+            "Error: Expected the operand to contain a value, got NONE\n");
     exit(EXIT_FAILURE);
   }
 };
@@ -141,7 +142,7 @@ static void command_handle_react(Command *command, Remus *remus,
     remus_react(remus, deployment_id);
   case NONE:
   default:
-    fprintf(stderr, "Error: Expected a location containing a deployment id");
+    fprintf(stderr, "Error: Expected a location containing a deployment id\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -166,13 +167,13 @@ static void command_handle_consume(Command *command, Remus *remus,
     case NONE:
     default:
       fprintf(stderr,
-              "Error: Expected a value in the %dth output of the deployment",
+              "Error: Expected a value in the %dth output of the deployment\n",
               (int)deployment_id);
       exit(EXIT_FAILURE);
     }
   case NONE:
   default:
-    fprintf(stderr, "Error: Expected a location containing a deployment id");
+    fprintf(stderr, "Error: Expected a location containing a deployment id\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -189,7 +190,7 @@ static void command_handle_global(Command *command, Remus *remus,
     break;
   case NONE:
   default:
-    fprintf(stderr, "Error: Expected a value for the global signal %s",
+    fprintf(stderr, "Error: Expected a value for the global signal %s\n",
             value_option.value->as.reactor);
     exit(EXIT_FAILURE);
   }
@@ -211,7 +212,8 @@ static void command_handle_read(Command *command, Remus *remus,
       remus_react(remus, current_deployment_id);
     case NONE:
     default:
-      fprintf(stderr, "Error: expected trampoline variable to contain a value");
+      fprintf(stderr,
+              "Error: expected trampoline variable to contain a value\n");
       exit(EXIT_FAILURE);
     }
   case LOC_I:
@@ -219,7 +221,7 @@ static void command_handle_read(Command *command, Remus *remus,
   case LOC_R:
   default:
     fprintf(stderr, "Error: A trampoline variable should be stored in the "
-                    "deployment memory");
+                    "deployment memory\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -227,8 +229,20 @@ static void command_handle_read(Command *command, Remus *remus,
 static void command_handle_sink(Command *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Sink sink = command->as.sink;
-  // TODO: continue from here
-  // TODO: implement this;
+  ValueOption operand_option;
+  operand_option = operand_fetch(&sink.operand, current_deployment_id, remus);
+  switch (operand_option.option_tag) {
+  case SOME:
+    remus_set_output(remus, current_deployment_id, sink.number,
+                     *operand_option.value);
+    remus_increment_pc(remus, current_deployment_id);
+    remus_react(remus, current_deployment_id);
+    break;
+  case NONE:
+  default:
+    fprintf(stderr, "Error: Expected value in the operand\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void command_handle_make_poly(Remus *remus,
@@ -242,6 +256,7 @@ static void command_handle_alloc_poly(Command *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
   // TODO: implement this;
+  // TODO: Continue here
 }
 
 static void command_handle_primitive(Command *command, Remus *remus,
