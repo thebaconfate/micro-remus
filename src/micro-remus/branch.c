@@ -4,7 +4,6 @@
 #include "value.h"
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 
 static Branches branches = NULL;
 

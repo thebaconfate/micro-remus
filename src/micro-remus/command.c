@@ -74,7 +74,6 @@ static void command_handle_update(Command *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Update update = command->as.update;
   ValueOption operand_option;
-  Operand operand;
   switch (update.location.type) {
   case LOC_D:
     operand_option =
@@ -107,8 +106,10 @@ static void command_handle_update(Command *command, Remus *remus,
 static void command_handle_scan(Command *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Scan scan = command->as.scan;
+  DeploymentId deployment_id =
+      remus_get_deployment_in_scope(remus, current_deployment_id, scan.number);
   ValueOption operandOption;
-  operandOption = operand_fetch(&scan.operand, current_deployment_id, remus);
+  operandOption = operand_fetch(&scan.operand, deployment_id, remus);
   switch (operandOption.option_tag) {
   case SOME:
     remus_write(remus, current_deployment_id, *operandOption.value);
@@ -125,13 +126,53 @@ static void command_handle_scan(Command *command, Remus *remus,
 static void command_handle_react(Command *command, Remus *remus,
                                  DeploymentId current_deployment_id) {
   React react = command->as.react;
-  // TODO: implement this;
+  ValueOption locationOption;
+  DeploymentId deployment_id;
+  locationOption =
+      location_fetch(&react.location, current_deployment_id, remus);
+  switch (locationOption.option_tag) {
+  case SOME:
+    deployment_id = locationOption.value->as.number;
+    remus_increment_pc(remus, current_deployment_id);
+    remus_set_return_address(remus, deployment_id, current_deployment_id);
+    remus_initialize_pc(remus, deployment_id);
+    remus_react(remus, deployment_id);
+  case NONE:
+  default:
+    fprintf(stderr, "Error: Expected a location containing a deployment id");
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void command_handle_consume(Command *command, Remus *remus,
                                    DeploymentId current_deployment_id) {
   Consume consume = command->as.consume;
-  // TODO: implement this;
+  ValueOption location_option, output_option;
+  DeploymentId deployment_id;
+  location_option =
+      location_fetch(&consume.location, current_deployment_id, remus);
+  switch (location_option.option_tag) {
+  case SOME:
+    deployment_id = location_option.value->as.number;
+    output_option = remus_get_output(remus, deployment_id, consume.number);
+    switch (output_option.option_tag) {
+    case SOME:
+      remus_write(remus, current_deployment_id, *output_option.value);
+      remus_increment_pc(remus, current_deployment_id);
+      remus_react(remus, current_deployment_id);
+      break;
+    case NONE:
+    default:
+      fprintf(stderr,
+              "Error: Expected a value in the %dth output of the deployment",
+              (int)deployment_id);
+      exit(EXIT_FAILURE);
+    }
+  case NONE:
+  default:
+    fprintf(stderr, "Error: Expected a location containing a deployment id");
+    exit(EXIT_FAILURE);
+  }
 }
 
 static void command_handle_global(Command *command, Remus *remus,
