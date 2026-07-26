@@ -2,6 +2,7 @@
 #define REMUS_BRANCH_H
 
 #include "../include/uthash.h"
+#include "option.h"
 #include "types.h"
 #include "value.h"
 
@@ -32,7 +33,7 @@ void branch_free();
  * @return A pointer to the stored Value if found, or NULL if no matching entry
  * exists.
  */
-Value *branch_find(Name reactor_name);
+ValueOption branch_find(Name reactor_name);
 
 /**
  * @brief Stores a value under a given reactor name in the global branch

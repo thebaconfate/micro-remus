@@ -1,4 +1,5 @@
 #include "command.h"
+#include "branch.h"
 #include "location.h"
 #include "operand.h"
 #include "option.h"
@@ -255,8 +256,31 @@ static void command_handle_make_poly(Remus *remus,
 static void command_handle_alloc_poly(Command *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
-  // TODO: implement this;
-  // TODO: Continue here
+  ValueOption operand_option, location_option, branch_option;
+  Value reactor_name;
+  BranchEntry branchEntry;
+  operand_option =
+      operand_fetch(&alloc_poly.operand, current_deployment_id, remus);
+  switch (operand_option.option_tag) {
+  case SOME:
+    reactor_name = *operand_option.value;
+    location_option =
+        location_fetch(&alloc_poly.location, current_deployment_id, remus);
+    switch (location_option.option_tag) {
+    case SOME:
+      branch_option = branch_find(reactor_name.as.reactor);
+
+      // TODO: Continue here
+    default:
+      fprintf(stderr, "Error: Expected a branching point");
+      exit(EXIT_FAILURE);
+      break;
+    }
+  default:
+    fprintf(stderr, "Error: Expected to fetch a rho from the operand");
+    exit(EXIT_FAILURE);
+    break;
+  }
 }
 
 static void command_handle_primitive(Command *command, Remus *remus,
