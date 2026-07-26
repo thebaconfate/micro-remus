@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-static Branches branches = NULL;
+Branch branch_new() { return NULL; }
 
 /**
  * @brief Frees all memory associated with the global branches hash table.
@@ -14,14 +14,19 @@ static Branches branches = NULL;
  * Iterates through the global hash table, removes each entry, frees its
  * dynamically allocated key, and releases the BranchEntry structure.
  */
-void branch_free() {
-  BranchEntry *branch, *tmp;
-  HASH_ITER(hh, branches, branch, tmp) {
-    HASH_DEL(branches, branch);
-    if (branch->key)
-      free(branch->key);
-    free(branch);
+void branch_free(Branch *branch) {
+  if (branch == NULL || *branch == NULL)
+    return;
+  BranchEntry *current, *tmp;
+  HASH_ITER(hh, *branch, current, tmp) {
+    HASH_DEL(*branch, current);
+    if (current->key) {
+      free(current->key);
+      current->key = NULL;
+    }
+    free(current);
   }
+  *branch = NULL;
 }
 
 /**
@@ -35,9 +40,11 @@ void branch_free() {
  * @return A pointer to the stored Value if found, or NULL if no matching entry
  * exists.
  */
-ValueOption branch_find(const Name reactor_name) {
+ValueOption branch_find(const Branch branch, const Name reactor_name) {
+  if (branch == NULL || reactor_name == NULL)
+    return (ValueOption){.option_tag = NONE, .value = NULL};
   BranchEntry *s = NULL;
-  HASH_FIND(hh, branches, reactor_name, strlen(reactor_name), s);
+  HASH_FIND(hh, branch, reactor_name, strlen(reactor_name), s);
   if (s == NULL)
     return (ValueOption){.option_tag = NONE, .value = NULL};
   else
@@ -57,21 +64,21 @@ ValueOption branch_find(const Name reactor_name) {
  *
  * @note If memory allocation fails, the entry will not be stored.
  */
-void branch_add(Name reactor_name, Value value) {
-  BranchEntry *s = malloc(sizeof(BranchEntry));
-  if (!s)
-    return;
-
-  size_t name_len = strlen(reactor_name);
-
-  s->key = malloc(name_len + 1);
-  if (!s->key) {
-    free(s);
-    return;
+void branch_add(Branch *branch, Name reactor_name, Value value) {
+  BranchEntry *s = NULL;
+  size_t react_name_len = strlen(reactor_name);
+  HASH_FIND(hh, *branch, reactor_name, react_name_len, s);
+  if (s == NULL) {
+    s = (BranchEntry *)malloc(sizeof(BranchEntry));
+    if (!s)
+      return;
+    s->key = malloc(react_name_len + 1);
+    if (!s->key) {
+      free(s);
+      return;
+    }
+    strcpy(s->key, reactor_name);
+    HASH_ADD_KEYPTR(hh, *branch, s->key, react_name_len, s);
   }
-  strcpy(s->key, reactor_name);
-
   s->val = value;
-
-  HASH_ADD_KEYPTR(hh, branches, s->key, name_len, s);
 }

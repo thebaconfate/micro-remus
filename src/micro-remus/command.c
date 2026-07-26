@@ -257,7 +257,7 @@ static void command_handle_alloc_poly(Command *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
   ValueOption operand_option, location_option, branch_option;
-  Value reactor_name;
+  Value reactor_name, branch;
   BranchEntry branchEntry;
   operand_option =
       operand_fetch(&alloc_poly.operand, current_deployment_id, remus);
@@ -268,7 +268,8 @@ static void command_handle_alloc_poly(Command *command, Remus *remus,
         location_fetch(&alloc_poly.location, current_deployment_id, remus);
     switch (location_option.option_tag) {
     case SOME:
-      branch_option = branch_find(reactor_name.as.reactor);
+      branch = *location_option.value;
+      branch_option = branch_find(branch.as.branch, reactor_name.as.reactor);
 
       // TODO: Continue here
     default:

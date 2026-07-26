@@ -12,7 +12,9 @@ typedef struct BranchEntry {
   UT_hash_handle hh;
 } BranchEntry;
 
-typedef BranchEntry *Branches;
+typedef BranchEntry *Branch;
+
+Branch branch_new();
 
 /**
  * @brief Frees all memory associated with the global branches hash table.
@@ -20,7 +22,7 @@ typedef BranchEntry *Branches;
  * Iterates through the global hash table, removes each entry, frees its
  * dynamically allocated key, and releases the BranchEntry structure.
  */
-void branch_free();
+void branch_free(Branch *branch);
 
 /**
  * @brief Finds a stored value given a reactor name.
@@ -33,7 +35,7 @@ void branch_free();
  * @return A pointer to the stored Value if found, or NULL if no matching entry
  * exists.
  */
-ValueOption branch_find(Name reactor_name);
+ValueOption branch_find(const Branch branch, Name reactor_name);
 
 /**
  * @brief Stores a value under a given reactor name in the global branch
@@ -48,6 +50,6 @@ ValueOption branch_find(Name reactor_name);
  *
  * @note If memory allocation fails, the entry will not be stored.
  */
-void branch_add(Name reactor_name, Value value);
+void branch_add(Branch *branch, Name reactor_name, Value value);
 
 #endif

@@ -10,18 +10,19 @@ int main() {
 
   Value val = {.type = VAL_NUMBER, .as = {.number = 5}};
   Name name = "Main";
+  Branch branch = branch_new();
 
-  branch_add(name, val);
+  branch_add(&branch, name, val);
 
   printf("branch stored\n");
 
-  Value *v = branch_find(name);
+  ValueOption v = branch_find(branch, name);
 
-  if (v == NULL) {
+  if (v.option_tag == NONE) {
     printf("Branch not found\n");
   }
 
-  printf("value: %d\n", (int)v->as.number);
+  printf("value: %d\n", (int)v.value->as.number);
 
   return 0;
 }
