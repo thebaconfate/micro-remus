@@ -22,7 +22,7 @@ typedef enum {
   CMD_MAKE_POLY,
   CMD_ALLOC_POLY,
   CMD_PRIMITIVE
-} CommandTag;
+} InstructionTag;
 
 typedef struct AllocMono {
   Name name;
@@ -91,7 +91,7 @@ typedef struct Primitive {
 } Primitive;
 
 typedef struct {
-  CommandTag tag;
+  InstructionTag tag;
   union {
     AllocMono alloc_mono;
     DefRho def_rho;
@@ -109,9 +109,9 @@ typedef struct {
     AllocPoly alloc_poly;
     Primitive primitive;
   } as;
-} Command;
+} Instruction;
 
-void command_execute(Command *command, DeploymentId deployment_id,
+void command_execute(Instruction *command, DeploymentId deployment_id,
                      struct Remus *remus);
 
 #endif
