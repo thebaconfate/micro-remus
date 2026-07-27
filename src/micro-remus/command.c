@@ -1,4 +1,5 @@
 #include "command.h"
+#include "abstractions.h"
 #include "branch.h"
 #include "location.h"
 #include "operand.h"
@@ -6,8 +7,11 @@
 #include "remus.h"
 #include "types.h"
 #include "value.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define STREQ(a, b) (strcmp((a), (b)) == 0)
 
 static void command_handle_alloc_mono(Remus *remus,
                                       DeploymentId current_deployment_id) {
@@ -104,7 +108,7 @@ static void command_handle_update(Command *command, Remus *remus,
     exit(EXIT_FAILURE);
     break;
   }
-};
+}
 
 static void command_handle_scan(Command *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
@@ -125,7 +129,7 @@ static void command_handle_scan(Command *command, Remus *remus,
             "Error: Expected the operand to contain a value, got NONE\n");
     exit(EXIT_FAILURE);
   }
-};
+}
 
 static void command_handle_react(Command *command, Remus *remus,
                                  DeploymentId current_deployment_id) {
@@ -256,7 +260,7 @@ static void command_handle_make_poly(Remus *remus,
 static void command_handle_alloc_poly(Command *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
-  ValueOption operand_option, location_option, branch_option;
+  ValueOption operand_option, location_option, value_option;
   Value reactor_name, branch;
   BranchEntry branchEntry;
   operand_option =
@@ -269,25 +273,138 @@ static void command_handle_alloc_poly(Command *command, Remus *remus,
     switch (location_option.option_tag) {
     case SOME:
       branch = *location_option.value;
-      branch_option = branch_find(branch.as.branch, reactor_name.as.reactor);
-
-      // TODO: Continue here
+      value_option = branch_find(branch.as.branch, reactor_name.as.reactor);
+      switch (value_option.option_tag) {
+      case SOME:
+        remus_write(remus, current_deployment_id, *value_option.value);
+        break;
+      default:
+        fprintf(stderr,
+                "Error: The reactor should already have been deployed\n");
+        exit(EXIT_FAILURE);
+        break;
+      }
+      remus_increment_pc(remus, current_deployment_id);
+      remus_react(remus, current_deployment_id);
+      break;
     default:
-      fprintf(stderr, "Error: Expected a branching point");
+      fprintf(stderr, "Error: Expected a branching point\n");
       exit(EXIT_FAILURE);
       break;
     }
   default:
-    fprintf(stderr, "Error: Expected to fetch a rho from the operand");
+    fprintf(stderr, "Error: Expected to fetch a rho from the operand\n");
     exit(EXIT_FAILURE);
     break;
   }
 }
 
+static void primitive_handle_plus(Remus *remus,
+                                  DeploymentId current_deployment_id,
+                                  Inputs *inputs) {
+  Value sum = (Value){.type = VAL_NUMBER, .as.number = 0};
+  ValueOption option;
+  for (size_t i = 0; i < inputs->len; i++) {
+    option = inputs->storage[i];
+    if (option.option_tag == SOME) {
+      sum = value_add(sum, *option.value);
+    }
+  }
+  remus_write(remus, current_deployment_id, sum);
+}
+
+static void primitive_handle_minus(Remus *remus,
+                                   DeploymentId current_deployment_id,
+                                   Inputs *inputs) {
+  if (inputs->len < 2) {
+    fprintf(stderr, "Error: operation - requires at least 2 inputs\n");
+    exit(EXIT_FAILURE);
+  }
+  Value operand1, operand2, subtraction_result;
+  switch (inputs->storage[0].option_tag) {
+  case SOME:
+    switch (inputs->storage[0].value->type) {
+    case VAL_NUMBER:
+      operand1 = *inputs->storage[0].value;
+      switch (inputs->storage[1].option_tag) {
+      case SOME:
+        switch (inputs->storage[1].value->type) {
+        case VAL_NUMBER:
+          operand2 = *inputs->storage[1].value;
+          subtraction_result =
+              (Value){.type = VAL_NUMBER,
+                      .as.number = operand1.as.number - operand2.as.number};
+          remus_write(remus, current_deployment_id, subtraction_result);
+          break;
+        default:
+          fprintf(stderr,
+                  "Error: Expected a number as a second argument for - \n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+      default:
+        fprintf(stderr,
+                "Error: Expected a second argument for - gotten: NONE \n");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    default:
+      fprintf(stderr, "Error: Expected a number as a first argument for - \n");
+      exit(EXIT_FAILURE);
+    }
+    break;
+  default:
+    fprintf(stderr, "Error: Expected a first argument for - gotten: NONE\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
+static void primitive_handle_mul(Remus *remus,
+                                 DeploymentId current_deployment_id,
+                                 Inputs *inputs) {
+  Value product = (Value){.type = VAL_NUMBER, .as.number = 1};
+  ValueOption option;
+  for (size_t i = 0; i < inputs->len; i++) {
+    option = inputs->storage[i];
+    if (option.option_tag == SOME) {
+      product = value_mul(product, *option.value);
+    }
+  }
+  remus_write(remus, current_deployment_id, product);
+}
+
 static void command_handle_primitive(Command *command, Remus *remus,
                                      DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
-  // TODO: implement this;
+  Inputs *inputs = remus_get_inputs(remus, current_deployment_id);
+  if (STREQ(primitive.name, "+")) {
+    primitive_handle_plus(remus, current_deployment_id, inputs);
+  } else if (STREQ(primitive.name, "-")) {
+    primitive_handle_minus(remus, current_deployment_id, inputs);
+  } else if (STREQ(primitive.name, "*")) {
+    primitive_handle_mul(remus, current_deployment_id, inputs);
+  } else if (STREQ(primitive.name, ">")) {
+    if (inputs->len != 2) {
+      fprintf(stderr, "Error: wrong arity for >, gotten %d", (int)inputs->len);
+      exit(EXIT_FAILURE);
+    }
+    // TODO: implement this;
+  } else if (STREQ(primitive.name, "even?")) {
+    // TODO: implement this;
+  } else if (STREQ(primitive.name, "if*")) {
+    // TODO: implement this;
+  } else if (STREQ(primitive.name, "foo")) {
+    printf("foo was found");
+  } else if (STREQ(primitive.name, "bar")) {
+    printf("bar was found");
+  } else {
+    fprintf(stderr,
+            "Error: µ-Remus does not understand the primitive operation %s\n",
+            primitive.name);
+    exit(EXIT_FAILURE);
+  }
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 void command_execute(Command *command, DeploymentId current_deployment_id,
