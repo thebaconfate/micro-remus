@@ -1,4 +1,4 @@
-#include "command.h"
+#include "instruction.h"
 #include "abstractions.h"
 #include "branch.h"
 #include "location.h"
@@ -19,7 +19,7 @@ static void command_handle_alloc_mono(Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_def_rho(Command *command, Remus *remus,
+static void command_handle_def_rho(Instruction *command, Remus *remus,
                                    DeploymentId current_deployment_id) {
   DefRho def_rho = command->as.def_rho;
   Value reactor = {.type = VAL_REACTOR, .as.reactor = def_rho.name};
@@ -34,7 +34,7 @@ static void command_handle_alloc_rho(Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_trampoline(Command *command, Remus *remus,
+static void command_handle_trampoline(Instruction *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   Trampoline trampoline = command->as.trampoline;
   remus_write(remus, current_deployment_id, trampoline.value);
@@ -42,7 +42,7 @@ static void command_handle_trampoline(Command *command, Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_supply(Command *command, Remus *remus,
+static void command_handle_supply(Instruction *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Supply supply = command->as.supply;
   ValueOption location_option, operand_option;
@@ -77,7 +77,7 @@ static void command_handle_supply(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_update(Command *command, Remus *remus,
+static void command_handle_update(Instruction *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Update update = command->as.update;
   ValueOption operand_option;
@@ -110,7 +110,7 @@ static void command_handle_update(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_scan(Command *command, Remus *remus,
+static void command_handle_scan(Instruction *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Scan scan = command->as.scan;
   DeploymentId deployment_id =
@@ -131,7 +131,7 @@ static void command_handle_scan(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_react(Command *command, Remus *remus,
+static void command_handle_react(Instruction *command, Remus *remus,
                                  DeploymentId current_deployment_id) {
   React react = command->as.react;
   ValueOption locationOption;
@@ -152,7 +152,7 @@ static void command_handle_react(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_consume(Command *command, Remus *remus,
+static void command_handle_consume(Instruction *command, Remus *remus,
                                    DeploymentId current_deployment_id) {
   Consume consume = command->as.consume;
   ValueOption location_option, output_option;
@@ -183,7 +183,7 @@ static void command_handle_consume(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_global(Command *command, Remus *remus,
+static void command_handle_global(Instruction *command, Remus *remus,
                                   DeploymentId current_deployment_id) {
   Global global = command->as.global;
   ValueOption value_option = remus_get_signal(remus, global.name);
@@ -201,7 +201,7 @@ static void command_handle_global(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_read(Command *command, Remus *remus,
+static void command_handle_read(Instruction *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Read read = command->as.read;
   ValueOption location_option;
@@ -231,7 +231,7 @@ static void command_handle_read(Command *command, Remus *remus,
   }
 }
 
-static void command_handle_sink(Command *command, Remus *remus,
+static void command_handle_sink(Instruction *command, Remus *remus,
                                 DeploymentId current_deployment_id) {
   Sink sink = command->as.sink;
   ValueOption operand_option;
@@ -257,7 +257,7 @@ static void command_handle_make_poly(Remus *remus,
   return;
 }
 
-static void command_handle_alloc_poly(Command *command, Remus *remus,
+static void command_handle_alloc_poly(Instruction *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
   ValueOption operand_option, location_option, value_option;
@@ -373,7 +373,7 @@ static void primitive_handle_mul(Remus *remus,
   remus_write(remus, current_deployment_id, product);
 }
 
-static void command_handle_primitive(Command *command, Remus *remus,
+static void command_handle_primitive(Instruction *command, Remus *remus,
                                      DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
   Inputs *inputs = remus_get_inputs(remus, current_deployment_id);
@@ -407,7 +407,7 @@ static void command_handle_primitive(Command *command, Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-void command_execute(Command *command, DeploymentId current_deployment_id,
+void command_execute(Instruction *command, DeploymentId current_deployment_id,
                      Remus *remus) {
   ValueOption option;
   switch (command->tag) {

@@ -1,7 +1,7 @@
 
-#include "micro-remus/branch.h"
-#include "micro-remus/types.h"
-#include "micro-remus/value.h"
+#include "src/micro-remus/branch.h"
+#include "src/micro-remus/types.h"
+#include "src/micro-remus/value.h"
 #include <stdio.h>
 int main() {
 

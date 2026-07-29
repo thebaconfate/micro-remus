@@ -2,7 +2,7 @@
 #define REMUS_ABSTRACTIONS_H
 
 #include "../include/uthash.h"
-#include "command.h"
+#include "instruction.h"
 #include "option.h"
 #include "types.h"
 #include <stddef.h>
@@ -16,11 +16,11 @@ typedef struct ValueOptionArray {
 typedef ValueOptionArray Inputs;
 typedef ValueOptionArray Outputs;
 
-typedef struct Commands {
-  Command *storage;
+typedef struct Instructions {
+  Instruction *storage;
   size_t len;
   size_t capacity;
-} Commands;
+} Instructions;
 
 typedef struct ReactorEntry {
   Name key;

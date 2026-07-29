@@ -4,6 +4,7 @@
 
 #include "abstractions.h"
 #include "deployment.h"
+#include "instruction.h"
 #include "location.h"
 #include "option.h"
 #include "program.h"
@@ -73,11 +74,13 @@ Outputs remus_get_outputs(Remus *remus, DeploymentId deployment_id);
 void remus_set_output(Remus *remus, DeploymentId deployment_id, Number n,
                       Value value);
 
-Command remus_get_deployment_command(Remus *remus, DeploymentId deployment_id);
+Instruction remus_get_deployment_command(Remus *remus,
+                                         DeploymentId deployment_id);
 
 ValueOption remus_read_d(Remus *remus, DeploymentId deployment_id, Number n);
 
-Command remus_get_reaction_command(Remus *remus, DeploymentId deployment_id);
+Instruction remus_get_reaction_command(Remus *remus,
+                                       DeploymentId deployment_id);
 
 ValueOption remus_read_r(Remus *remus, DeploymentId deployment_id, Number n);
 
@@ -89,7 +92,8 @@ void remus_write_at(Remus *remus, DeploymentId deployment_id, Number index,
 void remus_update_trampoline(Remus *remus, DeploymentId deployment_id,
                              Number location, Value value);
 
-Command remus_retrieve_next_command(Remus *remus, DeploymentId deployment_id);
+Instruction remus_retrieve_next_command(Remus *remus,
+                                        DeploymentId deployment_id);
 
 bool remus_has_finished_phase(Remus *remus, DeploymentId deployment_id);
 
