@@ -3,6 +3,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char *value_type_to_string(ValueType type) {
+  switch (type) {
+  case VAL_NUMBER:
+    return "NUMBER";
+  case VAL_BOOLEAN:
+    return "BOOLEAN";
+  case VAL_BRANCH:
+    return "BOOLEAN";
+  case VAL_REACTOR:
+    return "REACTOR";
+  }
+}
+
 void print_value(const Value *v) {
   if (!v)
     return;

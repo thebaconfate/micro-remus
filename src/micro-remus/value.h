@@ -34,4 +34,6 @@ Value value_sum(const Value *values, size_t count);
 
 Value value_product(const Value *values, size_t count);
 
+const char *value_type_to_string(ValueType type);
+
 #endif

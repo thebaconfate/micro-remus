@@ -373,6 +373,46 @@ static void primitive_handle_mul(Remus *remus,
   remus_write(remus, current_deployment_id, product);
 }
 
+static void primitive_handle_greater_than(Remus *remus,
+                                          DeploymentId current_deployment_id,
+                                          Inputs *inputs) {
+  size_t input_size = inputs->len;
+  ValueOption *args = inputs->storage;
+  ValueOption x_option, y_option;
+  Value result;
+  Number x, y;
+  if (input_size != 2) {
+    fprintf(stderr, "Error: Wrong arity. > requires 2 arguments");
+    exit(EXIT_FAILURE);
+  }
+  x_option = args[0];
+  if (x_option.option_tag == NONE) {
+    fprintf(stderr, "Error: Expected a value as first argument of >. Got NONE");
+    exit(EXIT_FAILURE);
+  }
+  if (x_option.value->type != VAL_NUMBER) {
+    const char *type = value_type_to_string(x_option.value->type);
+    fprintf(stderr, "Error: > Expected NUMBER as first argument got: %s", type);
+    exit(EXIT_FAILURE);
+  }
+  x = x_option.value->as.number;
+  y_option = args[1];
+  if (y_option.option_tag == NONE) {
+    fprintf(stderr,
+            "Error: Expected a value as second argument of >. Got NONE");
+    exit(EXIT_FAILURE);
+  }
+  if (y_option.value->type != VAL_NUMBER) {
+    const char *type = value_type_to_string(y_option.value->type);
+    fprintf(stderr, "Error: > Expected NUMBERR as second argument got: %s",
+            type);
+    exit(EXIT_FAILURE);
+  }
+  y = y_option.value->as.number;
+  result = (Value){.type = VAL_BOOLEAN, .as.boolean = x > y};
+  remus_write(remus, current_deployment_id, result);
+}
+
 static void command_handle_primitive(Instruction *command, Remus *remus,
                                      DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
@@ -384,11 +424,7 @@ static void command_handle_primitive(Instruction *command, Remus *remus,
   } else if (STREQ(primitive.name, "*")) {
     primitive_handle_mul(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, ">")) {
-    if (inputs->len != 2) {
-      fprintf(stderr, "Error: wrong arity for >, gotten %d", (int)inputs->len);
-      exit(EXIT_FAILURE);
-    }
-    // TODO: implement this;
+    primitive_handle_greater_than(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, "even?")) {
     // TODO: implement this;
   } else if (STREQ(primitive.name, "if*")) {
