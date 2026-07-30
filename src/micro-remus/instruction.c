@@ -413,6 +413,19 @@ static void primitive_handle_greater_than(Remus *remus,
   remus_write(remus, current_deployment_id, result);
 }
 
+static void primitive_handle_even(Remus *remus,
+                                  DeploymentId current_deployment_id,
+                                  Inputs *inputs) {
+  size_t input_len = inputs->len;
+  // TODO: implement this, underneath the rust code:
+  // "even?" =>
+  // remus.write(current_deployment_id,Value::Boolean(values.iter().fold(true,
+  // |acc, value| match value {
+  // Some(Value::Number(n)) => (0 == n % 2) & acc,
+  // _ => panic!("Expected a number to test for even, gotten {:?}", value)
+  // }))),
+}
+
 static void command_handle_primitive(Instruction *command, Remus *remus,
                                      DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
@@ -426,7 +439,7 @@ static void command_handle_primitive(Instruction *command, Remus *remus,
   } else if (STREQ(primitive.name, ">")) {
     primitive_handle_greater_than(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, "even?")) {
-    // TODO: implement this;
+    primitive_handle_even(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, "if*")) {
     // TODO: implement this;
   } else if (STREQ(primitive.name, "foo")) {
