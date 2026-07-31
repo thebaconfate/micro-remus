@@ -417,13 +417,27 @@ static void primitive_handle_even(Remus *remus,
                                   DeploymentId current_deployment_id,
                                   Inputs *inputs) {
   size_t input_len = inputs->len;
-  // TODO: implement this, underneath the rust code:
-  // "even?" =>
-  // remus.write(current_deployment_id,Value::Boolean(values.iter().fold(true,
-  // |acc, value| match value {
-  // Some(Value::Number(n)) => (0 == n % 2) & acc,
-  // _ => panic!("Expected a number to test for even, gotten {:?}", value)
-  // }))),
+  ValueOption option;
+  Value value, write_value;
+  Number number;
+  bool result = true;
+  for (size_t i = 0; i < inputs->len; i++) {
+    option = inputs->storage[i];
+    if (option.option_tag != SOME) {
+      fprintf(stderr,
+              "Error: Expected a number to test for even, gotten NONE\n");
+      exit(EXIT_FAILURE);
+    }
+    value = *option.value;
+    if (value.type != VAL_NUMBER) {
+      fprintf(stderr, "Error: Expected a number to test for even, gotten %s\n",
+              value_type_to_string(value.type));
+      exit(EXIT_FAILURE);
+    }
+    result &= (value.as.number % 2 == 0);
+  }
+  write_value = (Value){.type = VAL_BOOLEAN, .as.boolean = result};
+  remus_write(remus, current_deployment_id, write_value);
 }
 
 static void command_handle_primitive(Instruction *command, Remus *remus,
