@@ -1,7 +1,18 @@
 #include "operand.h"
+#include "location.h"
 #include "option.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 ValueOption operand_fetch(Operand *operand, DeploymentId deployment_id,
                           struct Remus *remus) {
-  return (ValueOption){};
+  switch (operand->tag) {
+  case OPERAND_VALUE:
+    return (ValueOption){.option_tag = SOME, .value = &operand->value};
+  case OPERAND_LOCATION:
+    return location_fetch(&operand->location, deployment_id, remus);
+  default:
+    fprintf(stderr, "Error: unknown operand type\n");
+    exit(EXIT_FAILURE);
+  }
 }
