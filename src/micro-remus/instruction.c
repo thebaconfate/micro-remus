@@ -440,6 +440,55 @@ static void primitive_handle_even(Remus *remus,
   remus_write(remus, current_deployment_id, write_value);
 }
 
+static void primitive_handle_if_star(Remus *remus,
+                                     DeploymentId current_deployment_id,
+                                     Inputs *inputs) {
+  size_t input_len = inputs->len;
+  ValueOption option, consequent_option, alternative_option;
+  Value condition, consequent, alternative;
+  if (input_len < 1) {
+    fprintf(stderr, "Error: Expected boolean, no condition in inputs\n");
+    exit(EXIT_FAILURE);
+  }
+  option = inputs->storage[0];
+  if (option.option_tag != SOME) {
+    fprintf(stderr, "Error: Expected boolean, gotten NONE \n");
+    exit(EXIT_FAILURE);
+  }
+  condition = *option.value;
+  if (condition.type != VAL_BOOLEAN) {
+    fprintf(stderr, "Error: Expected boolean, gotten %s \n",
+            value_type_to_string(condition.type));
+    exit(EXIT_FAILURE);
+  }
+  if (condition.as.boolean) {
+    if (input_len < 2) {
+      fprintf(stderr, "Error: Expected consequent, no consequent in inputs \n");
+      exit(EXIT_FAILURE);
+    }
+    consequent_option = inputs->storage[1];
+    if (consequent_option.option_tag != SOME) {
+      fprintf(stderr, "Error: Expected consequent, gotten NONE\n");
+      exit(EXIT_FAILURE);
+    }
+    consequent = *consequent_option.value;
+    remus_write(remus, current_deployment_id, consequent);
+  } else {
+    if (input_len < 3) {
+      fprintf(stderr,
+              "Error: Expected alternative, no alternative in inputs \n");
+      exit(EXIT_FAILURE);
+    }
+    alternative_option = inputs->storage[2];
+    if (alternative_option.option_tag != SOME) {
+      fprintf(stderr, "Error: Expected alternative, gotten NONE\n");
+      exit(EXIT_FAILURE);
+    }
+    alternative = *alternative_option.value;
+    remus_write(remus, current_deployment_id, alternative);
+  }
+}
+
 static void instruction_handle_primitive(Instruction *command, Remus *remus,
                                          DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
@@ -455,11 +504,11 @@ static void instruction_handle_primitive(Instruction *command, Remus *remus,
   } else if (STREQ(primitive.name, "even?")) {
     primitive_handle_even(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, "if*")) {
-    // TODO: implement this;
+    primitive_handle_if_star(remus, current_deployment_id, inputs);
   } else if (STREQ(primitive.name, "foo")) {
-    printf("foo was found");
+    printf("foo was found\n");
   } else if (STREQ(primitive.name, "bar")) {
-    printf("bar was found");
+    printf("bar was found\n");
   } else {
     fprintf(stderr,
             "Error: µ-Remus does not understand the primitive operation %s\n",
