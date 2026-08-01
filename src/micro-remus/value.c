@@ -13,6 +13,9 @@ const char *value_type_to_string(ValueType type) {
     return "BOOLEAN";
   case VAL_REACTOR:
     return "REACTOR";
+  default:
+    fprintf(stderr, "Error: Unknown type");
+    exit(EXIT_FAILURE);
   }
 }
 
