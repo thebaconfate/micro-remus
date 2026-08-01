@@ -7,7 +7,11 @@
 #include <stdbool.h>
 
 // TODO: Actually implement these functions
-Remus remus_new(Program program) { return (Remus){}; }
+Remus remus_new(Program program) {
+  DeploymentId main_deployment_id = 1;
+  // Deployments deployments = deployments_new();
+  return (Remus){};
+}
 void remus_start(Remus *remus) {}
 Number remus_increment_time(Remus *remus) { return (Number){}; }
 void remus_actuate(Remus *remus, Outputs outputs) {
