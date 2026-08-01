@@ -111,7 +111,7 @@ typedef struct {
   } as;
 } Instruction;
 
-void command_execute(Instruction *command, DeploymentId deployment_id,
-                     struct Remus *remus);
+void instruction_execute(Instruction *command, DeploymentId deployment_id,
+                         struct Remus *remus);
 
 #endif

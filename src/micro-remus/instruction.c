@@ -13,14 +13,14 @@
 
 #define STREQ(a, b) (strcmp((a), (b)) == 0)
 
-static void command_handle_alloc_mono(Remus *remus,
-                                      DeploymentId current_deployment_id) {
+static void intrsuction_handle_alloc_mono(Remus *remus,
+                                          DeploymentId current_deployment_id) {
   remus_increment_pc(remus, current_deployment_id);
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_def_rho(Instruction *command, Remus *remus,
-                                   DeploymentId current_deployment_id) {
+static void instruction_handle_def_rho(Instruction *command, Remus *remus,
+                                       DeploymentId current_deployment_id) {
   DefRho def_rho = command->as.def_rho;
   Value reactor = {.type = VAL_REACTOR, .as.reactor = def_rho.name};
   remus_write(remus, current_deployment_id, reactor);
@@ -28,22 +28,22 @@ static void command_handle_def_rho(Instruction *command, Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_alloc_rho(Remus *remus,
-                                     DeploymentId current_deployment_id) {
+static void instruction_handle_alloc_rho(Remus *remus,
+                                         DeploymentId current_deployment_id) {
   remus_increment_pc(remus, current_deployment_id);
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_trampoline(Instruction *command, Remus *remus,
-                                      DeploymentId current_deployment_id) {
+static void instruction_handle_trampoline(Instruction *command, Remus *remus,
+                                          DeploymentId current_deployment_id) {
   Trampoline trampoline = command->as.trampoline;
   remus_write(remus, current_deployment_id, trampoline.value);
   remus_increment_pc(remus, current_deployment_id);
   remus_react(remus, current_deployment_id);
 }
 
-static void command_handle_supply(Instruction *command, Remus *remus,
-                                  DeploymentId current_deployment_id) {
+static void instruction_handle_supply(Instruction *command, Remus *remus,
+                                      DeploymentId current_deployment_id) {
   Supply supply = command->as.supply;
   ValueOption location_option, operand_option;
   DeploymentId deployment_id;
@@ -77,8 +77,8 @@ static void command_handle_supply(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_update(Instruction *command, Remus *remus,
-                                  DeploymentId current_deployment_id) {
+static void instruction_handle_update(Instruction *command, Remus *remus,
+                                      DeploymentId current_deployment_id) {
   Update update = command->as.update;
   ValueOption operand_option;
   switch (update.location.type) {
@@ -110,8 +110,8 @@ static void command_handle_update(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_scan(Instruction *command, Remus *remus,
-                                DeploymentId current_deployment_id) {
+static void instruction_handle_scan(Instruction *command, Remus *remus,
+                                    DeploymentId current_deployment_id) {
   Scan scan = command->as.scan;
   DeploymentId deployment_id =
       remus_get_deployment_in_scope(remus, current_deployment_id, scan.number);
@@ -131,8 +131,8 @@ static void command_handle_scan(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_react(Instruction *command, Remus *remus,
-                                 DeploymentId current_deployment_id) {
+static void instruction_handle_react(Instruction *command, Remus *remus,
+                                     DeploymentId current_deployment_id) {
   React react = command->as.react;
   ValueOption locationOption;
   DeploymentId deployment_id;
@@ -152,8 +152,8 @@ static void command_handle_react(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_consume(Instruction *command, Remus *remus,
-                                   DeploymentId current_deployment_id) {
+static void instruction_handle_consume(Instruction *command, Remus *remus,
+                                       DeploymentId current_deployment_id) {
   Consume consume = command->as.consume;
   ValueOption location_option, output_option;
   DeploymentId deployment_id;
@@ -183,8 +183,8 @@ static void command_handle_consume(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_global(Instruction *command, Remus *remus,
-                                  DeploymentId current_deployment_id) {
+static void instruction_handle_global(Instruction *command, Remus *remus,
+                                      DeploymentId current_deployment_id) {
   Global global = command->as.global;
   ValueOption value_option = remus_get_signal(remus, global.name);
   switch (value_option.option_tag) {
@@ -201,8 +201,8 @@ static void command_handle_global(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_read(Instruction *command, Remus *remus,
-                                DeploymentId current_deployment_id) {
+static void instruction_handle_read(Instruction *command, Remus *remus,
+                                    DeploymentId current_deployment_id) {
   Read read = command->as.read;
   ValueOption location_option;
   Value value;
@@ -231,8 +231,8 @@ static void command_handle_read(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_sink(Instruction *command, Remus *remus,
-                                DeploymentId current_deployment_id) {
+static void instruction_handle_sink(Instruction *command, Remus *remus,
+                                    DeploymentId current_deployment_id) {
   Sink sink = command->as.sink;
   ValueOption operand_option;
   operand_option = operand_fetch(&sink.operand, current_deployment_id, remus);
@@ -250,15 +250,15 @@ static void command_handle_sink(Instruction *command, Remus *remus,
   }
 }
 
-static void command_handle_make_poly(Remus *remus,
-                                     DeploymentId current_deployment_id) {
+static void instruction_handle_make_poly(Remus *remus,
+                                         DeploymentId current_deployment_id) {
   remus_increment_pc(remus, current_deployment_id);
   remus_react(remus, current_deployment_id);
   return;
 }
 
-static void command_handle_alloc_poly(Instruction *command, Remus *remus,
-                                      DeploymentId current_deployment_id) {
+static void instruction_handle_alloc_poly(Instruction *command, Remus *remus,
+                                          DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
   ValueOption operand_option, location_option, value_option;
   Value reactor_name, branch;
@@ -440,8 +440,8 @@ static void primitive_handle_even(Remus *remus,
   remus_write(remus, current_deployment_id, write_value);
 }
 
-static void command_handle_primitive(Instruction *command, Remus *remus,
-                                     DeploymentId current_deployment_id) {
+static void instruction_handle_primitive(Instruction *command, Remus *remus,
+                                         DeploymentId current_deployment_id) {
   Primitive primitive = command->as.primitive;
   Inputs *inputs = remus_get_inputs(remus, current_deployment_id);
   if (STREQ(primitive.name, "+")) {
@@ -470,54 +470,54 @@ static void command_handle_primitive(Instruction *command, Remus *remus,
   remus_react(remus, current_deployment_id);
 }
 
-void command_execute(Instruction *command, DeploymentId current_deployment_id,
-                     Remus *remus) {
+void instruction_execute(Instruction *command,
+                         DeploymentId current_deployment_id, Remus *remus) {
   ValueOption option;
   switch (command->tag) {
   case CMD_ALLOC_MONO:
-    command_handle_alloc_mono(remus, current_deployment_id);
+    intrsuction_handle_alloc_mono(remus, current_deployment_id);
     break;
   case CMD_DEF_RHO:
-    command_handle_def_rho(command, remus, current_deployment_id);
+    instruction_handle_def_rho(command, remus, current_deployment_id);
     break;
   case CMD_ALLOC_RHO:
-    command_handle_alloc_rho(remus, current_deployment_id);
+    instruction_handle_alloc_rho(remus, current_deployment_id);
     break;
   case CMD_TRAMPOLINE:
-    command_handle_trampoline(command, remus, current_deployment_id);
+    instruction_handle_trampoline(command, remus, current_deployment_id);
     break;
   case CMD_SUPPLY:
-    command_handle_supply(command, remus, current_deployment_id);
+    instruction_handle_supply(command, remus, current_deployment_id);
     break;
   case CMD_UPDATE:
-    command_handle_update(command, remus, current_deployment_id);
+    instruction_handle_update(command, remus, current_deployment_id);
     break;
   case CMD_SCAN:
-    command_handle_scan(command, remus, current_deployment_id);
+    instruction_handle_scan(command, remus, current_deployment_id);
     break;
   case CMD_REACT:
-    command_handle_react(command, remus, current_deployment_id);
+    instruction_handle_react(command, remus, current_deployment_id);
     break;
   case CMD_CONSUME:
-    command_handle_consume(command, remus, current_deployment_id);
+    instruction_handle_consume(command, remus, current_deployment_id);
     break;
   case CMD_GLOBAL:
-    command_handle_global(command, remus, current_deployment_id);
+    instruction_handle_global(command, remus, current_deployment_id);
     break;
   case CMD_READ:
-    command_handle_read(command, remus, current_deployment_id);
+    instruction_handle_read(command, remus, current_deployment_id);
     break;
   case CMD_SINK:
-    command_handle_sink(command, remus, current_deployment_id);
+    instruction_handle_sink(command, remus, current_deployment_id);
     break;
   case CMD_MAKE_POLY:
-    command_handle_make_poly(remus, current_deployment_id);
+    instruction_handle_make_poly(remus, current_deployment_id);
     break;
   case CMD_ALLOC_POLY:
-    command_handle_alloc_poly(command, remus, current_deployment_id);
+    instruction_handle_alloc_poly(command, remus, current_deployment_id);
     break;
   case CMD_PRIMITIVE:
-    command_handle_primitive(command, remus, current_deployment_id);
+    instruction_handle_primitive(command, remus, current_deployment_id);
     break;
   default:
     fprintf(stderr, "Error: Invalid command type tag\n");
