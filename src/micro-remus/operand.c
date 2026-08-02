@@ -7,7 +7,7 @@ ValueOption operand_fetch(Operand *operand, DeploymentId deployment_id,
                           struct Remus *remus) {
   switch (operand->tag) {
   case OPERAND_VALUE:
-    return (ValueOption){.option_tag = SOME, .value = &operand->value};
+    return &operand->value;
   case OPERAND_LOCATION:
     return location_fetch(&operand->location, deployment_id, remus);
   default:

@@ -1,18 +1,41 @@
 
 #include "remus.h"
 #include "abstractions.h"
+#include "deployment.h"
 #include "instruction.h"
+#include "platform.h"
+#include "signal.h"
 #include "types.h"
+#include "value.h"
 #include <stdbool.h>
 
 // TODO: Actually implement these functions
+static Number remus_increment_time(Remus *remus);
+
 Remus remus_new(Program program) {
   DeploymentId main_deployment_id = 1;
-  // Deployments deployments = deployments_new();
-  return (Remus){};
+  Deployments deployments = deployments_new();
+  SignalEnvironment global_signals = signal_new();
+  signal_put(&global_signals, "time",
+             (Value){.type = VAL_NUMBER, .as.number = 0});
+
+  return (Remus){.main_deployment_id = main_deployment_id,
+                 .reactors = NULL, // FIX: Fix this (placeholder);
+                 .deployments = deployments,
+                 .global_signals = global_signals};
 }
-void remus_start(Remus *remus) {}
-Number remus_increment_time(Remus *remus) { return (Number){}; }
+
+void remus_start(Remus *remus) {
+  remus_increment_time(remus);
+  remus_initialize_pc(remus, remus->main_deployment_id);
+  remus_set_dirty_bit(remus, remus->main_deployment_id, true);
+  remus_react(remus, remus->main_deployment_id);
+  Outputs outputs = remus_get_outputs(remus, remus->main_deployment_id);
+  remus_actuate(remus, outputs);
+  platform_sleep_ms(1000);
+}
+
+static Number remus_increment_time(Remus *remus) { return (Number){}; }
 void remus_actuate(Remus *remus, Outputs outputs) {
 } // Check signature of outputs
 

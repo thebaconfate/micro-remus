@@ -1,8 +1,8 @@
 #include "location.h"
 #include "remus.h"
 
-Value *location_fetch(const Location *loc, DeploymentId deployment_id,
-                      Remus *remus) {
+ValueOption location_fetch(const Location *loc, DeploymentId deployment_id,
+                           Remus *remus) {
   if (!loc || !remus)
     return NULL;
   switch (loc->type) {
@@ -15,6 +15,6 @@ Value *location_fetch(const Location *loc, DeploymentId deployment_id,
   case LOC_O:
     return remus_get_output(remus, deployment_id, loc->index);
   default:
-    return (ValueOption){.option_tag = NONE, .value = NULL};
+    return NULL;
   }
 }

@@ -2,6 +2,7 @@
 #define REMUS_REACTOR_H
 
 #include "abstractions.h"
+#include "hash_table.h"
 #include <stddef.h>
 
 typedef struct Reactor {
@@ -10,6 +11,17 @@ typedef struct Reactor {
   size_t input_size;
   size_t output_size;
 } Reactor;
+
+typedef Entry ReactorEntry;
+typedef HashTable Reactors;
+
+Reactors *reactors_new();
+
+void reactors_free(Reactors *reactors, void (*free_reactor)(void *));
+
+Reactor *reactors_get(const Reactors *reactors, Name reactor_name);
+
+void reactors_put();
 
 Reactor reactor_new(Instructions deployment_commands,
                     Instructions reaction_commands, size_t input_size,

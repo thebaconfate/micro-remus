@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+bool value_option_equals(ValueOption a, ValueOption b) {
+  if (a == NULL && b == NULL)
+    return true;
+  else if (a != NULL && b != NULL)
+    return value_equals(*a, *b);
+  else
+    return false;
+}
+
 const char *value_type_to_string(ValueType type) {
   switch (type) {
   case VAL_NUMBER:

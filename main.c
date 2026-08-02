@@ -9,20 +9,22 @@ int main() {
   printf("branch created\n");
 
   Value val = {.type = VAL_NUMBER, .as = {.number = 5}};
+  printf("Storing the number with value %d\n", (int)val.as.number);
+
   Name name = "Main";
   Branch branch = branch_new();
 
-  branch_add(&branch, name, val);
+  branch_put(&branch, name, val);
 
   printf("branch stored\n");
 
-  ValueOption v = branch_find(branch, name);
+  ValueOption v = branch_get(branch, name);
 
-  if (v.option_tag == NONE) {
+  if (v == NULL) {
     printf("Branch not found\n");
   }
 
-  printf("value: %d\n", (int)v.value->as.number);
+  printf("value: %d\n", (int)v->as.number);
 
   return 0;
 }

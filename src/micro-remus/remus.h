@@ -7,6 +7,7 @@
 #include "location.h"
 #include "program.h"
 #include "reactor.h"
+#include "signal.h"
 #include "types.h"
 #include "value.h"
 #include <stdbool.h>
@@ -21,7 +22,6 @@ typedef struct Remus {
 
 Remus remus_new(Program program);
 void remus_start(Remus *remus);
-Number remus_increment_time(Remus *remus);
 void remus_actuate(Remus *remus, Outputs outputs); // Check signature of outputs
 
 /*----------- reactors -------------*/
