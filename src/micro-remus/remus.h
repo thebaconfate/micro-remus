@@ -5,7 +5,6 @@
 #include "deployment.h"
 #include "instruction.h"
 #include "location.h"
-#include "option.h"
 #include "program.h"
 #include "reactor.h"
 #include "types.h"
@@ -76,12 +75,12 @@ void remus_set_output(Remus *remus, DeploymentId deployment_id, Number n,
 Instruction remus_get_deployment_command(Remus *remus,
                                          DeploymentId deployment_id);
 
-ValueOption remus_read_d(Remus *remus, DeploymentId deployment_id, Number n);
+Value *remus_read_d(Remus *remus, DeploymentId deployment_id, Number n);
 
 Instruction remus_get_reaction_command(Remus *remus,
                                        DeploymentId deployment_id);
 
-ValueOption remus_read_r(Remus *remus, DeploymentId deployment_id, Number n);
+Value *remus_read_r(Remus *remus, DeploymentId deployment_id, Number n);
 
 void remus_write(Remus *remus, DeploymentId deployment_id, Value value);
 

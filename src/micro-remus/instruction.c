@@ -3,7 +3,6 @@
 #include "branch.h"
 #include "location.h"
 #include "operand.h"
-#include "option.h"
 #include "remus.h"
 #include "types.h"
 #include "value.h"
@@ -45,59 +44,39 @@ static void instruction_handle_trampoline(Instruction *command, Remus *remus,
 static void instruction_handle_supply(Instruction *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   Supply supply = command->as.supply;
-  ValueOption location_option, operand_option;
+  ValueOption location, operand;
   DeploymentId deployment_id;
-  location_option =
-      location_fetch(&supply.location, current_deployment_id, remus);
-  switch (location_option.option_tag) {
-  case SOME:
-    deployment_id = location_option.value->as.number;
-    operand_option =
-        operand_fetch(&supply.operand, current_deployment_id, remus);
-    switch (operand_option.option_tag) {
-    case SOME:
-      remus_set_input(remus, deployment_id, supply.number,
-                      *operand_option.value);
-      remus_increment_pc(remus, current_deployment_id);
-      remus_react(remus, current_deployment_id);
-      break;
-    case NONE:
-      fprintf(stderr, "Error: Expected a value from operand\n");
-      exit(EXIT_FAILURE);
-      break;
-    }
-    break;
-  case NONE:
+  location = location_fetch(&supply.location, current_deployment_id, remus);
+  if (location == NULL) {
     fprintf(stderr, "Error: Expected a location containing a deployment id\n");
     exit(EXIT_FAILURE);
-    break;
-  default:
-    fprintf(stderr, "Error: Unexpected error during handling CMD_SUPPLY\n");
+  }
+  deployment_id = location->as.number;
+  operand = operand_fetch(&supply.operand, current_deployment_id, remus);
+  if (operand == NULL) {
+    fprintf(stderr, "Error: Expected a value from operand\n");
     exit(EXIT_FAILURE);
   }
+  remus_set_input(remus, deployment_id, supply.number, *operand);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void instruction_handle_update(Instruction *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   Update update = command->as.update;
-  ValueOption operand_option;
+  ValueOption operand;
   switch (update.location.type) {
   case LOC_D:
-    operand_option =
-        operand_fetch(&update.operand, current_deployment_id, remus);
-    switch (operand_option.option_tag) {
-    case SOME:
-      remus_update_trampoline(remus, current_deployment_id,
-                              update.location.index, *operand_option.value);
-      remus_increment_pc(remus, current_deployment_id);
-      remus_react(remus, current_deployment_id);
-      break;
-    case NONE:
-    default:
+    operand = operand_fetch(&update.operand, current_deployment_id, remus);
+    if (operand == NULL) {
       fprintf(stderr, "Error: Expected value from operand\n");
       exit(EXIT_FAILURE);
-      break;
     }
+    remus_update_trampoline(remus, current_deployment_id, update.location.index,
+                            *operand);
+    remus_increment_pc(remus, current_deployment_id);
+    remus_react(remus, current_deployment_id);
     break;
   case LOC_I:
   case LOC_O:
@@ -115,112 +94,88 @@ static void instruction_handle_scan(Instruction *command, Remus *remus,
   Scan scan = command->as.scan;
   DeploymentId deployment_id =
       remus_get_deployment_in_scope(remus, current_deployment_id, scan.number);
-  ValueOption operand_option;
-  operand_option = operand_fetch(&scan.operand, deployment_id, remus);
-  switch (operand_option.option_tag) {
-  case SOME:
-    remus_write(remus, current_deployment_id, *operand_option.value);
-    remus_increment_pc(remus, current_deployment_id);
-    remus_react(remus, current_deployment_id);
-    break;
-  case NONE:
-  default:
+  ValueOption operand;
+  operand = operand_fetch(&scan.operand, deployment_id, remus);
+  if (operand == NULL) {
     fprintf(stderr,
             "Error: Expected the operand to contain a value, got NONE\n");
     exit(EXIT_FAILURE);
   }
+  remus_write(remus, current_deployment_id, *operand);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void instruction_handle_react(Instruction *command, Remus *remus,
                                      DeploymentId current_deployment_id) {
   React react = command->as.react;
-  ValueOption locationOption;
+  ValueOption location;
   DeploymentId deployment_id;
-  locationOption =
-      location_fetch(&react.location, current_deployment_id, remus);
-  switch (locationOption.option_tag) {
-  case SOME:
-    deployment_id = locationOption.value->as.number;
-    remus_increment_pc(remus, current_deployment_id);
-    remus_set_return_address(remus, deployment_id, current_deployment_id);
-    remus_initialize_pc(remus, deployment_id);
-    remus_react(remus, deployment_id);
-  case NONE:
-  default:
+  location = location_fetch(&react.location, current_deployment_id, remus);
+  if (location == NULL) {
     fprintf(stderr, "Error: Expected a location containing a deployment id\n");
     exit(EXIT_FAILURE);
   }
+  deployment_id = location->as.number;
+  remus_increment_pc(remus, current_deployment_id);
+  remus_set_return_address(remus, deployment_id, current_deployment_id);
+  remus_initialize_pc(remus, deployment_id);
+  remus_react(remus, deployment_id);
 }
 
 static void instruction_handle_consume(Instruction *command, Remus *remus,
                                        DeploymentId current_deployment_id) {
   Consume consume = command->as.consume;
-  ValueOption location_option, output_option;
+  ValueOption location, output;
   DeploymentId deployment_id;
-  location_option =
-      location_fetch(&consume.location, current_deployment_id, remus);
-  switch (location_option.option_tag) {
-  case SOME:
-    deployment_id = location_option.value->as.number;
-    output_option = remus_get_output(remus, deployment_id, consume.number);
-    switch (output_option.option_tag) {
-    case SOME:
-      remus_write(remus, current_deployment_id, *output_option.value);
-      remus_increment_pc(remus, current_deployment_id);
-      remus_react(remus, current_deployment_id);
-      break;
-    case NONE:
-    default:
-      fprintf(stderr,
-              "Error: Expected a value in the %dth output of the deployment\n",
-              (int)deployment_id);
-      exit(EXIT_FAILURE);
-    }
-  case NONE:
-  default:
+  location = location_fetch(&consume.location, current_deployment_id, remus);
+  if (location == NULL) {
     fprintf(stderr, "Error: Expected a location containing a deployment id\n");
     exit(EXIT_FAILURE);
   }
+  deployment_id = location->as.number;
+  output = remus_get_output(remus, deployment_id, consume.number);
+  if (output == NULL) {
+    fprintf(stderr,
+            "Error: Expected a value in the %dth output of the deployment\n",
+            (int)deployment_id);
+    exit(EXIT_FAILURE);
+  }
+  remus_write(remus, current_deployment_id, *output);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void instruction_handle_global(Instruction *command, Remus *remus,
                                       DeploymentId current_deployment_id) {
   Global global = command->as.global;
-  ValueOption value_option = remus_get_signal(remus, global.name);
-  switch (value_option.option_tag) {
-  case SOME:
-    remus_write(remus, current_deployment_id, *value_option.value);
-    remus_increment_pc(remus, current_deployment_id);
-    remus_react(remus, current_deployment_id);
-    break;
-  case NONE:
-  default:
+  ValueOption signal = remus_get_signal(remus, global.name);
+  if (signal == NULL) {
     fprintf(stderr, "Error: Expected a value for the global signal %s\n",
-            value_option.value->as.reactor);
+            global.name);
     exit(EXIT_FAILURE);
   }
+  remus_write(remus, current_deployment_id, *signal);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void instruction_handle_read(Instruction *command, Remus *remus,
                                     DeploymentId current_deployment_id) {
   Read read = command->as.read;
-  ValueOption location_option;
+  ValueOption location;
   Value value;
   switch (read.location.type) {
   case LOC_D:
-    location_option =
-        location_fetch(&read.location, current_deployment_id, remus);
-    switch (location_option.option_tag) {
-    case SOME:
-      remus_write(remus, current_deployment_id, *location_option.value);
-      remus_increment_pc(remus, current_deployment_id);
-      remus_react(remus, current_deployment_id);
-    case NONE:
-    default:
+    location = location_fetch(&read.location, current_deployment_id, remus);
+    if (location == NULL) {
       fprintf(stderr,
               "Error: expected trampoline variable to contain a value\n");
       exit(EXIT_FAILURE);
     }
+    remus_write(remus, current_deployment_id, *location);
+    remus_increment_pc(remus, current_deployment_id);
+    remus_react(remus, current_deployment_id);
   case LOC_I:
   case LOC_O:
   case LOC_R:
@@ -234,20 +189,15 @@ static void instruction_handle_read(Instruction *command, Remus *remus,
 static void instruction_handle_sink(Instruction *command, Remus *remus,
                                     DeploymentId current_deployment_id) {
   Sink sink = command->as.sink;
-  ValueOption operand_option;
-  operand_option = operand_fetch(&sink.operand, current_deployment_id, remus);
-  switch (operand_option.option_tag) {
-  case SOME:
-    remus_set_output(remus, current_deployment_id, sink.number,
-                     *operand_option.value);
-    remus_increment_pc(remus, current_deployment_id);
-    remus_react(remus, current_deployment_id);
-    break;
-  case NONE:
-  default:
+  ValueOption operand;
+  operand = operand_fetch(&sink.operand, current_deployment_id, remus);
+  if (operand == NULL) {
     fprintf(stderr, "Error: Expected value in the operand\n");
     exit(EXIT_FAILURE);
   }
+  remus_set_output(remus, current_deployment_id, sink.number, *operand);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void instruction_handle_make_poly(Remus *remus,
@@ -260,43 +210,29 @@ static void instruction_handle_make_poly(Remus *remus,
 static void instruction_handle_alloc_poly(Instruction *command, Remus *remus,
                                           DeploymentId current_deployment_id) {
   AllocPoly alloc_poly = command->as.alloc_poly;
-  ValueOption operand_option, location_option, value_option;
+  ValueOption operand, location, value;
   Value reactor_name, branch;
   BranchEntry branchEntry;
-  operand_option =
-      operand_fetch(&alloc_poly.operand, current_deployment_id, remus);
-  switch (operand_option.option_tag) {
-  case SOME:
-    reactor_name = *operand_option.value;
-    location_option =
-        location_fetch(&alloc_poly.location, current_deployment_id, remus);
-    switch (location_option.option_tag) {
-    case SOME:
-      branch = *location_option.value;
-      value_option = branch_find(branch.as.branch, reactor_name.as.reactor);
-      switch (value_option.option_tag) {
-      case SOME:
-        remus_write(remus, current_deployment_id, *value_option.value);
-        break;
-      default:
-        fprintf(stderr,
-                "Error: The reactor should already have been deployed\n");
-        exit(EXIT_FAILURE);
-        break;
-      }
-      remus_increment_pc(remus, current_deployment_id);
-      remus_react(remus, current_deployment_id);
-      break;
-    default:
-      fprintf(stderr, "Error: Expected a branching point\n");
-      exit(EXIT_FAILURE);
-      break;
-    }
-  default:
+  operand = operand_fetch(&alloc_poly.operand, current_deployment_id, remus);
+  if (operand == NULL) {
     fprintf(stderr, "Error: Expected to fetch a rho from the operand\n");
     exit(EXIT_FAILURE);
-    break;
   }
+  reactor_name = *operand;
+  location = location_fetch(&alloc_poly.location, current_deployment_id, remus);
+  if (location == NULL) {
+    fprintf(stderr, "Error: Expected a branching point\n");
+    exit(EXIT_FAILURE);
+  }
+  branch = *location;
+  value = branch_find(branch.as.branch, reactor_name.as.reactor);
+  if (value == NULL) {
+    fprintf(stderr, "Error: The reactor should already have been deployed\n");
+    exit(EXIT_FAILURE);
+  }
+  remus_write(remus, current_deployment_id, *value);
+  remus_increment_pc(remus, current_deployment_id);
+  remus_react(remus, current_deployment_id);
 }
 
 static void primitive_handle_plus(Remus *remus,
@@ -306,8 +242,8 @@ static void primitive_handle_plus(Remus *remus,
   ValueOption option;
   for (size_t i = 0; i < inputs->len; i++) {
     option = inputs->storage[i];
-    if (option.option_tag == SOME) {
-      sum = value_add(sum, *option.value);
+    if (option != NULL) {
+      sum = value_add(sum, *option);
     }
   }
   remus_write(remus, current_deployment_id, sum);
@@ -320,43 +256,30 @@ static void primitive_handle_minus(Remus *remus,
     fprintf(stderr, "Error: operation - requires at least 2 inputs\n");
     exit(EXIT_FAILURE);
   }
-  Value operand1, operand2, subtraction_result;
-  switch (inputs->storage[0].option_tag) {
-  case SOME:
-    switch (inputs->storage[0].value->type) {
-    case VAL_NUMBER:
-      operand1 = *inputs->storage[0].value;
-      switch (inputs->storage[1].option_tag) {
-      case SOME:
-        switch (inputs->storage[1].value->type) {
-        case VAL_NUMBER:
-          operand2 = *inputs->storage[1].value;
-          subtraction_result =
-              (Value){.type = VAL_NUMBER,
-                      .as.number = operand1.as.number - operand2.as.number};
-          remus_write(remus, current_deployment_id, subtraction_result);
-          break;
-        default:
-          fprintf(stderr,
-                  "Error: Expected a number as a second argument for - \n");
-          exit(EXIT_FAILURE);
-        }
-        break;
-      default:
-        fprintf(stderr,
-                "Error: Expected a second argument for - gotten: NONE \n");
-        exit(EXIT_FAILURE);
-      }
-      break;
-    default:
-      fprintf(stderr, "Error: Expected a number as a first argument for - \n");
-      exit(EXIT_FAILURE);
-    }
-    break;
-  default:
+  ValueOption operand1, operand2;
+  Value subtraction_result;
+  operand1 = inputs->storage[0];
+  if (operand1 == NULL) {
     fprintf(stderr, "Error: Expected a first argument for - gotten: NONE\n");
     exit(EXIT_FAILURE);
   }
+  if (operand1->type != VAL_NUMBER) {
+    fprintf(stderr, "Error: Expected a number as a first argument for - \n");
+    exit(EXIT_FAILURE);
+  }
+  operand2 = inputs->storage[1];
+  if (operand2 == NULL) {
+    fprintf(stderr, "Error: Expected a second argument for - gotten: NONE \n");
+    exit(EXIT_FAILURE);
+  }
+  if (operand2->type != VAL_NUMBER) {
+    fprintf(stderr, "Error: Expected a number as a second argument for - \n");
+    exit(EXIT_FAILURE);
+  }
+  subtraction_result =
+      (Value){.type = VAL_NUMBER,
+              .as.number = operand1->as.number - operand2->as.number};
+  remus_write(remus, current_deployment_id, subtraction_result);
 }
 
 static void primitive_handle_mul(Remus *remus,
@@ -366,8 +289,8 @@ static void primitive_handle_mul(Remus *remus,
   ValueOption option;
   for (size_t i = 0; i < inputs->len; i++) {
     option = inputs->storage[i];
-    if (option.option_tag == SOME) {
-      product = value_mul(product, *option.value);
+    if (option != NULL) {
+      product = value_mul(product, *option);
     }
   }
   remus_write(remus, current_deployment_id, product);
@@ -386,29 +309,29 @@ static void primitive_handle_greater_than(Remus *remus,
     exit(EXIT_FAILURE);
   }
   x_option = args[0];
-  if (x_option.option_tag == NONE) {
+  if (x_option == NULL) {
     fprintf(stderr, "Error: Expected a value as first argument of >. Got NONE");
     exit(EXIT_FAILURE);
   }
-  if (x_option.value->type != VAL_NUMBER) {
-    const char *type = value_type_to_string(x_option.value->type);
+  if (x_option->type != VAL_NUMBER) {
+    const char *type = value_type_to_string(x_option->type);
     fprintf(stderr, "Error: > Expected NUMBER as first argument got: %s", type);
     exit(EXIT_FAILURE);
   }
-  x = x_option.value->as.number;
+  x = x_option->as.number;
   y_option = args[1];
-  if (y_option.option_tag == NONE) {
+  if (y_option == NULL) {
     fprintf(stderr,
             "Error: Expected a value as second argument of >. Got NONE");
     exit(EXIT_FAILURE);
   }
-  if (y_option.value->type != VAL_NUMBER) {
-    const char *type = value_type_to_string(y_option.value->type);
+  if (y_option->type != VAL_NUMBER) {
+    const char *type = value_type_to_string(y_option->type);
     fprintf(stderr, "Error: > Expected NUMBERR as second argument got: %s",
             type);
     exit(EXIT_FAILURE);
   }
-  y = y_option.value->as.number;
+  y = y_option->as.number;
   result = (Value){.type = VAL_BOOLEAN, .as.boolean = x > y};
   remus_write(remus, current_deployment_id, result);
 }
@@ -423,12 +346,12 @@ static void primitive_handle_even(Remus *remus,
   bool result = true;
   for (size_t i = 0; i < inputs->len; i++) {
     option = inputs->storage[i];
-    if (option.option_tag != SOME) {
+    if (option == NULL) {
       fprintf(stderr,
               "Error: Expected a number to test for even, gotten NONE\n");
       exit(EXIT_FAILURE);
     }
-    value = *option.value;
+    value = *option;
     if (value.type != VAL_NUMBER) {
       fprintf(stderr, "Error: Expected a number to test for even, gotten %s\n",
               value_type_to_string(value.type));
@@ -451,11 +374,11 @@ static void primitive_handle_if_star(Remus *remus,
     exit(EXIT_FAILURE);
   }
   option = inputs->storage[0];
-  if (option.option_tag != SOME) {
+  if (option == NULL) {
     fprintf(stderr, "Error: Expected boolean, gotten NONE \n");
     exit(EXIT_FAILURE);
   }
-  condition = *option.value;
+  condition = *option;
   if (condition.type != VAL_BOOLEAN) {
     fprintf(stderr, "Error: Expected boolean, gotten %s \n",
             value_type_to_string(condition.type));
@@ -467,11 +390,11 @@ static void primitive_handle_if_star(Remus *remus,
       exit(EXIT_FAILURE);
     }
     consequent_option = inputs->storage[1];
-    if (consequent_option.option_tag != SOME) {
+    if (consequent_option == NULL) {
       fprintf(stderr, "Error: Expected consequent, gotten NONE\n");
       exit(EXIT_FAILURE);
     }
-    consequent = *consequent_option.value;
+    consequent = *consequent_option;
     remus_write(remus, current_deployment_id, consequent);
   } else {
     if (input_len < 3) {
@@ -480,11 +403,11 @@ static void primitive_handle_if_star(Remus *remus,
       exit(EXIT_FAILURE);
     }
     alternative_option = inputs->storage[2];
-    if (alternative_option.option_tag != SOME) {
+    if (alternative_option == NULL) {
       fprintf(stderr, "Error: Expected alternative, gotten NONE\n");
       exit(EXIT_FAILURE);
     }
-    alternative = *alternative_option.value;
+    alternative = *alternative_option;
     remus_write(remus, current_deployment_id, alternative);
   }
 }

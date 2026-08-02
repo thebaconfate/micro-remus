@@ -1,8 +1,8 @@
 #ifndef REMUS_LOCATION_H
 #define REMUS_LOCATION_H
 
-#include "option.h"
 #include "types.h"
+#include "value.h"
 #include <stdbool.h>
 
 struct Remus;

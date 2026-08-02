@@ -47,9 +47,19 @@ Inputs *deployment_get_inputs(Deployment *deployment) {
 }
 
 void deployment_write_input(Deployment *deployment, Number n,
-                            ValueOption input);
+                            ValueOption input) {
+  ValueOption current = deployment->inputs.storage[n];
+  // TODO: Continue here
+  if (!value_option_equals(current, input)) {
+    deployment->inputs.storage[n] = input;
+    deployment->dirty_bit = true;
+  }
+}
 
-void deployment_set_input(Deployment *deployment, Number n, Value value);
+void deployment_set_input(Deployment *deployment, Number n, Value value) {
+  deployment_write_input(deployment, n - 1,
+                         (ValueOption){.option_tag = SOME, &value});
+}
 
 ValueOption deployment_get_output(Deployment *deployment, Number n);
 

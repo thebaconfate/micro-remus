@@ -1,6 +1,5 @@
 #include "operand.h"
 #include "location.h"
-#include "option.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -2,7 +2,6 @@
 #define REMUS_BRANCH_H
 
 #include "../include/uthash.h"
-#include "option.h"
 #include "types.h"
 #include "value.h"
 

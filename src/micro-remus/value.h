@@ -4,6 +4,7 @@
 #include "types.h"
 
 struct BranchEntry;
+struct ValueOption;
 
 typedef enum {
   VAL_NUMBER,
@@ -21,6 +22,8 @@ typedef struct Value {
     struct BranchEntry *branch;
   } as;
 } Value;
+
+typedef Value *ValueOption;
 
 void print_value(const Value *v);
 

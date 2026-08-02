@@ -1,6 +1,5 @@
 #include "branch.h"
 #include "../include/uthash.h"
-#include "option.h"
 #include "types.h"
 #include "value.h"
 #include <stddef.h>
@@ -42,13 +41,13 @@ void branch_free(Branch *branch) {
  */
 ValueOption branch_find(const Branch branch, const Name reactor_name) {
   if (branch == NULL || reactor_name == NULL)
-    return (ValueOption){.option_tag = NONE, .value = NULL};
+    return NULL;
   BranchEntry *s = NULL;
   HASH_FIND(hh, branch, reactor_name, strlen(reactor_name), s);
   if (s == NULL)
-    return (ValueOption){.option_tag = NONE, .value = NULL};
+    return NULL;
   else
-    return (ValueOption){.option_tag = SOME, .value = &s->val};
+    return &s->val;
 }
 
 /**

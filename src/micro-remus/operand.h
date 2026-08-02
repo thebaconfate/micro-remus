@@ -2,7 +2,6 @@
 #define REMUS_OPERAND_H
 
 #include "location.h"
-#include "option.h"
 #include "types.h"
 
 struct Remus;
@@ -17,6 +16,6 @@ typedef struct Operand {
   };
 } Operand;
 
-ValueOption operand_fetch(Operand *operand, DeploymentId deployment_id,
-                          struct Remus *remus);
+Value *operand_fetch(Operand *operand, DeploymentId deployment_id,
+                     struct Remus *remus);
 #endif

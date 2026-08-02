@@ -2,7 +2,6 @@
 #include "remus.h"
 #include "abstractions.h"
 #include "instruction.h"
-#include "option.h"
 #include "types.h"
 #include <stdbool.h>
 

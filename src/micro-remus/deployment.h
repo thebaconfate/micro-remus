@@ -2,17 +2,13 @@
 #define REMUS_DEPLOYMENT_H
 
 #include "abstractions.h"
-#include "option.h"
 #include "types.h"
 #include "value.h"
 #include <stdbool.h>
 
 struct Reactor;
 
-typedef struct DeploymentIdOption {
-  OptionTag option_tag;
-  DeploymentId deployment_id;
-} DeploymentIdOption;
+typedef DeploymentId *DeploymentIdOption;
 
 typedef struct Deployment {
   DeploymentId deployment_id;

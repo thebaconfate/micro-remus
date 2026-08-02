@@ -3,18 +3,17 @@
 
 #include "../include/uthash.h"
 #include "instruction.h"
-#include "option.h"
 #include "types.h"
 #include <stddef.h>
 
-typedef struct ValueOptionArray {
+typedef struct ValueArray {
   ValueOption *storage;
   size_t len;
   size_t capacity;
-} ValueOptionArray;
+} ValueArray;
 
-typedef ValueOptionArray Inputs;
-typedef ValueOptionArray Outputs;
+typedef ValueArray Inputs;
+typedef ValueArray Outputs;
 
 typedef struct Instructions {
   Instruction *storage;
@@ -46,7 +45,7 @@ typedef struct SignalEntry {
 
 typedef SignalEntry *SignalEnvironment;
 
-typedef ValueOptionArray Memory;
+typedef ValueArray Memory;
 
 typedef struct Scope {
   DeploymentId *storage;
@@ -54,8 +53,8 @@ typedef struct Scope {
   size_t capacity;
 } Scope;
 
-ValueOptionArray value_option_array_new(size_t size);
+ValueArray value_option_array_new(size_t size);
 
-void value_option_array_free(ValueOptionArray *array);
+void value_option_array_free(ValueArray *array);
 
 #endif
