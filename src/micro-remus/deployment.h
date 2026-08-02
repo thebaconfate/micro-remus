@@ -1,3 +1,6 @@
+#ifndef REMUS_DEPLOYMENT_H
+#define REMUS_DEPLOYMENT_H
+
 #include "abstractions.h"
 #include "option.h"
 #include "types.h"
@@ -75,3 +78,5 @@ ValueOption deployment_read_r(Deployment *deployment, Number n);
 void deployment_write_r(Deployment *deployment, Value value, Number n);
 
 bool deployment_has_finished_phase(Deployment *deployment);
+
+#endif

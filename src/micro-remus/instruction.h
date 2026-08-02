@@ -1,5 +1,5 @@
-#ifndef REMUS_COMMAND_H
-#define REMUS_COMMAND_H
+#ifndef REMUS_INSTRUCTION_H
+#define REMUS_INSTRUCTION_H
 
 #include "location.h"
 #include "operand.h"

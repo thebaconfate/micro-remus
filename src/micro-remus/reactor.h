@@ -1,3 +1,5 @@
+#ifndef REMUS_REACTOR_H
+#define REMUS_REACTOR_H
 
 #include "abstractions.h"
 #include <stddef.h>
@@ -21,6 +23,8 @@ size_t reactor_deployment_size(Reactor *reactor);
 
 Instruction reactor_get_deployment_command(Reactor *reactor, size_t pc);
 
-size_t reactor_size(Reactor *reactor);
+size_t reactor_reactor_size(Reactor *reactor);
 
 Instruction reactor_get_reaction_command(Reactor *reactor, size_t pc);
+
+#endif

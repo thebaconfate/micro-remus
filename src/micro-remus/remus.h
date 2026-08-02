@@ -1,4 +1,3 @@
-
 #ifndef REMUS_H
 #define REMUS_H
 

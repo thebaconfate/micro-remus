@@ -23,7 +23,9 @@ Instruction reactor_get_deployment_command(Reactor *reactor, size_t pc) {
   return reactor->deployment_commands.storage[pc];
 }
 
-size_t reactor_size(Reactor *reactor) { return reactor->reaction_commands.len; }
+size_t reactor_reactor_size(Reactor *reactor) {
+  return reactor->reaction_commands.len;
+}
 
 Instruction reactor_get_reaction_command(Reactor *reactor, size_t pc) {
   return reactor->reaction_commands.storage[pc];

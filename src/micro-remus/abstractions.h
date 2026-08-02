@@ -54,4 +54,8 @@ typedef struct Scope {
   size_t capacity;
 } Scope;
 
+ValueOptionArray value_option_array_new(size_t size);
+
+void value_option_array_free(ValueOptionArray *array);
+
 #endif
