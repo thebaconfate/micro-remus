@@ -7,9 +7,9 @@ ValueOption operand_fetch(Operand *operand, DeploymentId deployment_id,
                           struct Remus *remus) {
   switch (operand->tag) {
   case OPERAND_VALUE:
-    return &operand->value;
+    return &operand->as.value;
   case OPERAND_LOCATION:
-    return location_fetch(&operand->location, deployment_id, remus);
+    return location_fetch(&operand->as.location, deployment_id, remus);
   default:
     fprintf(stderr, "Error: unknown operand type\n");
     exit(EXIT_FAILURE);

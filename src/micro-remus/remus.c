@@ -277,12 +277,11 @@ void remus_finish_deployment_phase(Remus *remus, DeploymentId deployment_id) {
 }
 
 void remus_finish_reaction_phase(Remus *remus, DeploymentId deployment_id) {
-  if (remus_has_finished_phase(remus, deployment_id))
-    return remus_finish_phase(remus, deployment_id);
-  else {
-    Instruction next_instruction =
-        remus_retrieve_next_instruction(remus, deployment_id);
-    instruction_execute(&next_instruction, deployment_id, remus);
+  remus_set_dirty_bit(remus, deployment_id, false);
+  DeploymentIdOption deployment_id_option =
+      remus_get_return_address(remus, deployment_id);
+  if (deployment_id_option != NULL) {
+    remus_react(remus, *deployment_id_option);
   }
 }
 

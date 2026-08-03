@@ -13,7 +13,7 @@ typedef struct Operand {
   union {
     Value value;
     Location location;
-  };
+  } as;
 } Operand;
 
 Value *operand_fetch(Operand *operand, DeploymentId deployment_id,

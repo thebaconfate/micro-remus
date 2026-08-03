@@ -78,9 +78,6 @@ typedef struct Sink {
   Number number;
 } Sink;
 
-typedef struct MakePoly {
-} MakePoly;
-
 typedef struct AllocPoly {
   Operand operand;
   Location location;
@@ -105,7 +102,6 @@ typedef struct {
     Read read;
     Global global;
     Sink sink;
-    MakePoly make_poly;
     AllocPoly alloc_poly;
     Primitive primitive;
   } as;

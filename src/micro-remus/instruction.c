@@ -78,9 +78,6 @@ static void instruction_handle_update(Instruction *command, Remus *remus,
     remus_increment_pc(remus, current_deployment_id);
     remus_react(remus, current_deployment_id);
     break;
-  case LOC_I:
-  case LOC_O:
-  case LOC_R:
   default:
     fprintf(stderr, "Error: A trampoline variable should be stored in the "
                     "deployment memory\n");
@@ -176,9 +173,7 @@ static void instruction_handle_read(Instruction *command, Remus *remus,
     remus_write(remus, current_deployment_id, *location);
     remus_increment_pc(remus, current_deployment_id);
     remus_react(remus, current_deployment_id);
-  case LOC_I:
-  case LOC_O:
-  case LOC_R:
+    break;
   default:
     fprintf(stderr, "Error: A trampoline variable should be stored in the "
                     "deployment memory\n");
