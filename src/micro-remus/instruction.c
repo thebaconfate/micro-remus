@@ -225,7 +225,7 @@ static void instruction_handle_alloc_poly(Instruction *command, Remus *remus,
     exit(EXIT_FAILURE);
   }
   branch = *location;
-  value = branch_get(branch.as.branch, reactor_name.as.reactor);
+  value = branch_find(branch.as.branch, reactor_name.as.reactor);
   if (value == NULL) {
     fprintf(stderr, "Error: The reactor should already have been deployed\n");
     exit(EXIT_FAILURE);

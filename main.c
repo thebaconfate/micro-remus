@@ -14,11 +14,11 @@ int main() {
   Name name = "Main";
   Branch branch = branch_new();
 
-  branch_put(&branch, name, val);
+  branch_store(&branch, name, val);
 
   printf("branch stored\n");
 
-  ValueOption v = branch_get(branch, name);
+  ValueOption v = branch_find(&branch, name);
 
   if (v == NULL) {
     printf("Branch not found\n");

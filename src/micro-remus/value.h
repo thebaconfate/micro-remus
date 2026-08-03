@@ -1,8 +1,9 @@
 #ifndef VALUE_H
 #define VALUE_H
 
-#include "hash_table.h"
 #include "types.h"
+
+struct BranchEntry;
 
 typedef enum {
   VAL_NUMBER,
@@ -17,7 +18,7 @@ typedef struct Value {
     Number number;
     Boolean boolean;
     Name reactor;
-    HashTable branch;
+    struct Branch *branch;
   } as;
 } Value;
 

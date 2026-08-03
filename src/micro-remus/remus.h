@@ -11,6 +11,7 @@
 #include "types.h"
 #include "value.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct Remus {
   // Hardware hardware
@@ -21,8 +22,7 @@ typedef struct Remus {
 } Remus;
 
 Remus remus_new(Program program);
-void remus_start(Remus *remus);
-void remus_actuate(Remus *remus, Outputs outputs); // Check signature of outputs
+void remus_start(Remus *remus, void (*sleep)(uint32_t ms));
 
 /*----------- reactors -------------*/
 Reactor *remus_get_reactor(Remus *remus, Name reactor_name);
@@ -35,18 +35,14 @@ ValueOption remus_get_signal(Remus *remus, Name signal_name);
 
 /*----------- deployments -------------*/
 
-Deployment remus_get_deployment(Remus *remus, DeploymentId deployment_id);
+Deployment *remus_get_deployment(Remus *remus, DeploymentId deployment_id);
 void remus_insert_deployment(Remus *remus, DeploymentId deployment_id,
                              Deployment deployment);
-bool remus_is_deployed(Remus *remus, DeploymentId deployment_id);
 void remus_set_deployed(Remus *remus, DeploymentId deployment_id);
 void remus_initialize_pc(Remus *remus, DeploymentId deployment_id);
 void remus_increment_pc(Remus *remus, DeploymentId deployment_id);
-DeploymentIdOption remus_get_return_address(Remus *remus,
-                                            DeploymentId deployment_id);
 void remus_set_return_address(Remus *remus, DeploymentId deployment_id,
                               DeploymentId return_address);
-bool remus_get_dirty_bit(Remus *remus, DeploymentId deployment_id);
 
 void remus_set_dirty_bit(Remus *remus, DeploymentId deployment_id, bool dirty);
 
@@ -72,13 +68,13 @@ Outputs remus_get_outputs(Remus *remus, DeploymentId deployment_id);
 void remus_set_output(Remus *remus, DeploymentId deployment_id, Number n,
                       Value value);
 
-Instruction remus_get_deployment_command(Remus *remus,
-                                         DeploymentId deployment_id);
+Instruction remus_get_deployment_instruction(Remus *remus,
+                                             DeploymentId deployment_id);
 
 Value *remus_read_d(Remus *remus, DeploymentId deployment_id, Number n);
 
-Instruction remus_get_reaction_command(Remus *remus,
-                                       DeploymentId deployment_id);
+Instruction remus_get_reaction_instruction(Remus *remus,
+                                           DeploymentId deployment_id);
 
 Value *remus_read_r(Remus *remus, DeploymentId deployment_id, Number n);
 
@@ -90,8 +86,8 @@ void remus_write_at(Remus *remus, DeploymentId deployment_id, Number index,
 void remus_update_trampoline(Remus *remus, DeploymentId deployment_id,
                              Number location, Value value);
 
-Instruction remus_retrieve_next_command(Remus *remus,
-                                        DeploymentId deployment_id);
+Instruction remus_retrieve_next_instruction(Remus *remus,
+                                            DeploymentId deployment_id);
 
 bool remus_has_finished_phase(Remus *remus, DeploymentId deployment_id);
 

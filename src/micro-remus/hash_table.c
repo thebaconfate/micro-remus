@@ -17,7 +17,6 @@ void ht_put(HashTable *hash_table, const void *key, size_t key_len, void *val,
     entry->val = val;
     HASH_ADD_KEYPTR(hh, *hash_table, entry->key, entry->key_len, entry);
   } else {
-    free(entry->val);
     entry->val = val;
   }
 }
