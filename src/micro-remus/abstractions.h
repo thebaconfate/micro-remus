@@ -1,8 +1,8 @@
 #ifndef REMUS_ABSTRACTIONS_H
 #define REMUS_ABSTRACTIONS_H
 
-#include "instruction.h"
 #include "types.h"
+#include "value.h"
 #include <stddef.h>
 
 typedef struct ValueArray {
@@ -13,12 +13,6 @@ typedef struct ValueArray {
 
 typedef ValueArray Inputs;
 typedef ValueArray Outputs;
-
-typedef struct Instructions {
-  Instruction *storage;
-  size_t len;
-  size_t capacity;
-} Instructions;
 
 typedef ValueArray Memory;
 

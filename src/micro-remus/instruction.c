@@ -492,3 +492,19 @@ void instruction_execute(Instruction *command,
   }
   return;
 }
+
+Instructions instructions_new() {
+  return (Instructions){.storage = NULL, .capacity = 0, .len = 0};
+}
+
+void instructions_add(Instructions *instructions, Instruction instruction) {
+  if (instructions->len + 1 > instructions->capacity) {
+    size_t new_capacity =
+        instructions->capacity == 0 ? 4 : instructions->capacity * 2;
+    Instruction *new_storage =
+        realloc(instructions->storage, sizeof(Instruction) * new_capacity);
+    instructions->capacity = new_capacity;
+    instructions->storage = new_storage;
+  }
+  instructions->storage[instructions->len++] = instruction;
+}

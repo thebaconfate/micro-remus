@@ -107,7 +107,43 @@ typedef struct {
   } as;
 } Instruction;
 
+typedef struct Instructions {
+  Instruction *storage;
+  size_t len;
+  size_t capacity;
+} Instructions;
+
+#define INSTRUCTION_LIST(X)                                                    \
+  X(alloc_mono, CMD_ALLOC_MONO, AllocMono)                                     \
+  X(def_rho, CMD_DEF_RHO, DefRho)                                              \
+  X(alloc_rho, CMD_ALLOC_RHO, AllocRho)                                        \
+  X(trampoline, CMD_TRAMPOLINE, Trampoline)                                    \
+  X(supply, CMD_SUPPLY, Supply)                                                \
+  X(update, CMD_UPDATE, Update)                                                \
+  X(scan, CMD_SCAN, Scan)                                                      \
+  X(react, CMD_REACT, React)                                                   \
+  X(consume, CMD_CONSUME, Consume)                                             \
+  X(read, CMD_READ, Read)                                                      \
+  X(global, CMD_GLOBAL, Global)                                                \
+  X(sink, CMD_SINK, Sink)                                                      \
+  X(alloc_poly, CMD_ALLOC_POLY, AllocPoly)                                     \
+  X(primitive, CMD_PRIMITIVE, Primitive)
+
+#define MAKE_INSTR_CONSTRUCTOR(name, tag_enum, struct_type)                    \
+  static inline Instruction inst_##name(struct_type payload) {                 \
+    return (Instruction){.tag = tag_enum, .as.name = payload};                 \
+  }
+
+INSTRUCTION_LIST(MAKE_INSTR_CONSTRUCTOR);
+
+#undef MAKE_CONSTRUCTOR
+#undef INSTRUCTION_LIST
+
 void instruction_execute(Instruction *instruction, DeploymentId deployment_id,
                          struct Remus *remus);
+
+Instructions instructions_new();
+
+void instructions_add(Instructions *instructions, Instruction instruction);
 
 #endif

@@ -10,6 +10,7 @@
 
 static void deployment_write_r(Deployment *deployment, Value value, Number pc);
 static void deployment_write_d(Deployment *deployment, Value value, Number n);
+
 Deployments deployments_new() { return NULL; }
 
 void deployments_free(Deployments *deployments) {

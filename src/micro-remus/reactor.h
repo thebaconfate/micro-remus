@@ -1,7 +1,7 @@
 #ifndef REMUS_REACTOR_H
 #define REMUS_REACTOR_H
 
-#include "abstractions.h"
+#include "instruction.h"
 #include <stddef.h>
 
 typedef struct Reactor {
