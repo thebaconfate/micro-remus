@@ -134,7 +134,7 @@ typedef struct Instructions {
     return (Instruction){.tag = tag_enum, .as.name = payload};                 \
   }
 
-INSTRUCTION_LIST(MAKE_INSTR_CONSTRUCTOR);
+INSTRUCTION_LIST(MAKE_INSTR_CONSTRUCTOR)
 
 #undef MAKE_CONSTRUCTOR
 #undef INSTRUCTION_LIST
